@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Mood2Idea</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>🌱 Mood 2 Idea</h1>
+    <p>오늘의 감정을 아이디어로 남겨보세요.</p>
+
+    <form method="POST">
+        <p>
+            🎨 오늘의 감정 색:
+            <select name="mood_color">
+                <option value="green">초록 (즐거움)</option>
+                <option value="blue">파랑 (우울)</option>
+                <option value="purple">보라 (외로움)</option>
+            </select>
+        </p>
+
+        <p>
+            ✏️ 오늘의 감정 한 줄:
+            <input type="text" name="mood_text" placeholder="지금 기분을 적어보세요">
+        </p>
+
+        <button type="submit">저장</button>
+    </form>
+
+    {% if mood_color and mood_text %}
+        <hr>
+        <h2>✅ 오늘의 기록</h2>
+        <p>선택한 색: <b>{{ mood_color }}</b></p>
+        <p>감정 한 줄: <b>{{ mood_text }}</b></p>
+    {% endif %}
+</div>
+
+</body>
+</html>
