@@ -11,31 +11,155 @@
     <h1>🌱 Mood 2 Idea</h1>
     <p>오늘의 감정을 아이디어로 남겨보세요.</p>
 
-    <form method="POST">
+    <!-- [NEW] 그림 업로드 대비: multipart/form-data -->
+    <form method="POST" enctype="multipart/form-data">
         <p>
             🎨 오늘의 감정 색:
-            <select name="mood_color">
-                <option value="green">초록 (즐거움)</option>
-                <option value="blue">파랑 (우울)</option>
-                <option value="purple">보라 (외로움)</option>
+            <select name="mood_color" required>
+                <!-- 기존 3개 + 확장 -->
+                <!-- [NEW] selected 유지: 서버에서 넘어온 mood_color로 선택 유지 -->
+                <option value="pink"      {% if mood_color == "pink" %}selected{% endif %}>설렘 (핑크)</option>
+                <option value="green"     {% if mood_color == "green" %}selected{% endif %}>즐거움 (초록)</option>
+                <option value="mint"      {% if mood_color == "mint" %}selected{% endif %}>평온 (민트)</option>
+
+                <option value="purple"    {% if mood_color == "purple" %}selected{% endif %}>외로움 (보라)</option>
+                <option value="magenta"   {% if mood_color == "magenta" %}selected{% endif %}>서운함 (자주색)</option>
+
+                <option value="blue"      {% if mood_color == "blue" %}selected{% endif %}>우울 (파랑)</option>
+                <option value="navy"      {% if mood_color == "navy" %}selected{% endif %}>지침 (네이비)</option>
+
+                <option value="yellow"    {% if mood_color == "yellow" %}selected{% endif %}>불안 (노랑)</option>
+                <option value="orange"    {% if mood_color == "orange" %}selected{% endif %}>초조함 (오렌지)</option>
+                <option value="tangerine" {% if mood_color == "tangerine" %}selected{% endif %}>서러움 (주황)</option>
+
+                <option value="red"       {% if mood_color == "red" %}selected{% endif %}>분노 (빨강)</option>
+                <option value="wine"      {% if mood_color == "wine" %}selected{% endif %}>답답함 (와인)</option>
+
+                <option value="black"     {% if mood_color == "black" %}selected{% endif %}>혼란 (검정)</option>
             </select>
         </p>
 
         <p>
             ✏️ 오늘의 감정 한 줄:
-            <input type="text" name="mood_text" placeholder="지금 기분을 적어보세요">
+            <!-- [NEW] value 유지 -->
+            <input
+                type="text"
+                name="mood_text"
+                placeholder="지금 기분을 적어보세요"
+                required
+                value="{{ mood_text or '' }}"
+            >
         </p>
 
+        <!-- (STEP3용) 모드 분기 라디오: app.py는 다음에 -->
+        <p>
+            🧭 표현 방식:
+            <!-- [NEW] checked 유지: mode 값으로 유지 -->
+            <label>
+                <input type="radio" name="mode" value="write"
+                       {% if (mode or 'write') == "write" %}checked{% endif %}>
+                ✍️ 글
+            </label>
+
+            <label>
+                <input type="radio" name="mode" value="draw"
+                       {% if mode == "draw" %}checked{% endif %}>
+                🎨 그림
+            </label>
+
+            <label>
+                <input type="radio" name="mode" value="music"
+                       {% if mode == "music" %}checked{% endif %}>
+                🎵 음악
+            </label>
+        </p>
+
+        <!-- [NEW] 모드별 입력칸은 "저장 전"에 보여줘야 하니까,
+             폼 안에 항상 존재시키고, JS로 보여주기/숨기기만 함 -->
+
+        <!-- ✍️ 글 -->
+        <div id="panel-write" class="mode-panel">
+            <p>✍️ 글 입력</p>
+            <!-- [NEW] textarea 값 유지 -->
+            <textarea name="text_content" rows="6" placeholder="자유롭게 적어보세요">{{ text_content or '' }}</textarea>
+
+            <!-- [NEW] 배경 설명(선택) -->
+            <p style="opacity:0.9;">🧩 이 글을 쓰게 된 생각/맥락 (선택)</p>
+            <input type="text" name="background" placeholder="예: 무슨 일이 있었는지"
+                   value="{{ background or '' }}">
+        </div>
+
+        <!-- 🎨 그림 -->
+        <div id="panel-draw" class="mode-panel" style="display:none;">
+            <p>🎨 그림 업로드</p>
+            <input type="file" name="image_file" accept="image/*">
+
+            <!-- [NEW] 배경 설명(선택) -->
+            <p style="opacity:0.9;">🧩 이 그림을 그릴 때의 생각/느낌 (선택)</p>
+            <input type="text" name="background" placeholder="예: 왜 이런 색/형태를 썼는지"
+                   value="{{ background or '' }}">
+
+            <p style="opacity:0.75;">(업로드 저장은 다음 단계에서 본격 처리해도 OK)</p>
+        </div>
+
+        <!-- 🎵 음악 -->
+        <div id="panel-music" class="mode-panel" style="display:none;">
+            <p>🎵 음악</p>
+            <p style="opacity:0.75;">(추천 연결은 다음 단계에서)</p>
+        </div>
+
+        <!-- [NEW] 저장 버튼은 항상 동일 위치/동일 동작 -->
         <button type="submit">저장</button>
     </form>
 
     {% if mood_color and mood_text %}
         <hr>
         <h2>✅ 오늘의 기록</h2>
+
+        <!-- 선택 색 텍스트 표시 -->
         <p>선택한 색: <b>{{ mood_color }}</b></p>
         <p>감정 한 줄: <b>{{ mood_text }}</b></p>
+
+        {% if mode %}
+            <p>표현 방식: <b>{{ mode }}</b></p>
+        {% endif %}
+
+        <!-- [NEW] 모드별로 저장된 내용(있으면)만 보여주기 -->
+        {% if mode == "write" and text_content %}
+            <p style="margin-top:12px;"><b>✍️ 글</b></p>
+            <div style="white-space:pre-wrap;">{{ text_content }}</div>
+        {% endif %}
+
+        {% if background %}
+            <p style="margin-top:12px;"><b>🧩 배경/맥락</b></p>
+            <div style="white-space:pre-wrap;">{{ background }}</div>
+        {% endif %}
     {% endif %}
 </div>
+
+<!-- [NEW] 라디오 선택 즉시 패널 전환(JS) -->
+<script>
+(function () {
+  const panels = {
+    write: document.getElementById("panel-write"),
+    draw: document.getElementById("panel-draw"),
+    music: document.getElementById("panel-music"),
+  };
+
+  function show(mode) {
+    Object.keys(panels).forEach(k => panels[k].style.display = (k === mode ? "block" : "none"));
+  }
+
+  // 초기 모드: 서버에서 렌더링된 checked 기준으로 맞춰줌
+  const checked = document.querySelector('input[name="mode"]:checked');
+  show(checked ? checked.value : "write");
+
+  // 변경 시 즉시 반영
+  document.querySelectorAll('input[name="mode"]').forEach(r => {
+    r.addEventListener("change", (e) => show(e.target.value));
+  });
+})();
+</script>
 
 </body>
 </html>
