@@ -12,8 +12,16 @@
     <h1>🌱 Mood 2 Idea</h1>
     <p>오늘의 감정을 아이디어로 남겨보세요.</p>
 
+    <!-- [STEP 3-A] 저장 완료 표시 (PRG redirect로 돌아온 경우만) -->
+    {% if saved == "1" %}
+        <p style="padding:10px 12px; border:1px solid #ddd; border-radius:10px;">
+            ✅ 저장 완료!
+        </p>
+    {% endif %}
+
     <!-- [NEW] 그림 업로드 대비: multipart/form-data -->
-    <form method="POST" enctype="multipart/form-data">
+    <!-- [STEP 3-A] autocomplete="off" : 브라우저가 이전 입력을 자동복원하는 걸 최대한 방지 -->
+    <form id="moodForm" method="POST" enctype="multipart/form-data" autocomplete="off">
         <p>
             🎨 오늘의 감정 색:
             <select name="mood_color" required>
@@ -49,6 +57,7 @@
                 placeholder="지금 기분을 적어보세요"
                 required
                 value="{{ mood_text or '' }}"
+                autocomplete="off"
             >
         </p>
 
@@ -82,12 +91,12 @@
         <div id="panel-write" class="mode-panel">
             <p>✍️ 글 입력</p>
             <!-- [NEW] textarea 값 유지 -->
-            <textarea name="text_content" rows="6" placeholder="자유롭게 적어보세요">{{ text_content or '' }}</textarea>
+            <textarea name="text_content" rows="6" placeholder="자유롭게 적어보세요" autocomplete="off">{{ text_content or '' }}</textarea>
 
             <!-- [NEW] 배경 설명(선택) -->
             <p style="opacity:0.9;">🧩 이 글을 쓰게 된 생각/맥락 (선택)</p>
             <input type="text" name="background" placeholder="예: 무슨 일이 있었는지"
-                   value="{{ background or '' }}">
+                   value="{{ background or '' }}" autocomplete="off">
         </div>
 
         <!-- 🎨 그림 -->
@@ -98,7 +107,7 @@
             <!-- [NEW] 배경 설명(선택) -->
             <p style="opacity:0.9;">🧩 이 그림을 그릴 때의 생각/느낌 (선택)</p>
             <input type="text" name="background" placeholder="예: 왜 이런 색/형태를 썼는지"
-                   value="{{ background or '' }}">
+                   value="{{ background or '' }}" autocomplete="off">
 
             <p style="opacity:0.75;">(업로드 저장은 다음 단계에서 본격 처리해도 OK)</p>
         </div>
@@ -113,28 +122,37 @@
         <button type="submit">저장</button>
     </form>
 
-    {% if mood_color and mood_text %}
-        <hr>
-        <h2>✅ 오늘의 기록</h2>
+    <hr>
+    <h2>✅ 오늘의 기록</h2>
 
-        <!-- 선택 색 텍스트 표시 -->
-        <p>선택한 색: <b>{{ mood_color }}</b></p>
-        <p>감정 한 줄: <b>{{ mood_text }}</b></p>
+    <p style="opacity:0.85;">
+        보기:
+        <a href="/?n=1">최근 1개</a> |
+        <a href="/?n=5">최근 5개</a> |
+        <a href="/?n=10">최근 10개</a>
+        <span style="margin-left:8px;">(현재 {{ today_records|length }}개)</span>
+    </p>
 
-        {% if mode %}
-            <p>표현 방식: <b>{{ mode }}</b></p>
-        {% endif %}
+    {% if today_records and today_records|length > 0 %}
+        {% for r in today_records %}
+            <div style="padding:12px 0; border-top:1px solid #eee;">
+                <p>선택한 색: <b>{{ r.mood_color }}</b></p>
+                <p>감정 한 줄: <b>{{ r.mood_text }}</b></p>
+                <p>표현 방식: <b>{{ r.mode }}</b></p>
 
-        <!-- [NEW] 모드별로 저장된 내용(있으면)만 보여주기 -->
-        {% if mode == "write" and text_content %}
-            <p style="margin-top:12px;"><b>✍️ 글</b></p>
-            <div style="white-space:pre-wrap;">{{ text_content }}</div>
-        {% endif %}
+                {% if r.mode == "write" and r.text_content %}
+                    <p style="margin-top:12px;"><b>✍️ 글</b></p>
+                    <div style="white-space:pre-wrap;">{{ r.text_content }}</div>
+                {% endif %}
 
-        {% if background %}
-            <p style="margin-top:12px;"><b>🧩 배경/맥락</b></p>
-            <div style="white-space:pre-wrap;">{{ background }}</div>
-        {% endif %}
+                {% if r.background %}
+                    <p style="margin-top:12px;"><b>🧩 배경/맥락</b></p>
+                    <div style="white-space:pre-wrap;">{{ r.background }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="opacity:0.75;">아직 기록이 없어요.</p>
     {% endif %}
 </div>
 
@@ -158,6 +176,65 @@
   // 변경 시 즉시 반영
   document.querySelectorAll('input[name="mode"]').forEach(r => {
     r.addEventListener("change", (e) => show(e.target.value));
+  });
+})();
+</script>
+
+<!-- [STEP 3-A] 저장 후 입력부 강제 초기화
+     - 문제: 브라우저(특히 Chrome)가 redirect 후에도 폼 값을 "자동복원"하는 경우가 있음
+     - 해결: saved=1(저장 직후)일 때 form.reset()으로 입력부를 강제로 비움 -->
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("saved") !== "1") return;
+
+  const form = document.getElementById("moodForm");
+  if (!form) return;
+
+  // ✅ 브라우저 자동복원보다 강하게: 저장 후엔 무조건 비움
+  form.reset();
+
+  // ✅ 기본 모드는 write로 (원하면 여기 바꿔도 됨)
+  const writeRadio = form.querySelector('input[name="mode"][value="write"]');
+  if (writeRadio) writeRadio.checked = true;
+
+  // 패널 전환도 즉시 반영 (글 패널 보이게)
+  const panelWrite = document.getElementById("panel-write");
+  const panelDraw = document.getElementById("panel-draw");
+  const panelMusic = document.getElementById("panel-music");
+  if (panelWrite && panelDraw && panelMusic) {
+    panelWrite.style.display = "block";
+    panelDraw.style.display = "none";
+    panelMusic.style.display = "none";
+  }
+})();
+</script>
+
+<!-- [STEP 3-A] 저장 후 새로고침 경고 제거
+     - 폼이 수정되면 "dirty"
+     - 저장(submit)하면 dirty 해제
+     - PRG redirect로 돌아온(saved=1) 경우에도 dirty 해제 -->
+<script>
+(function () {
+  const form = document.getElementById("moodForm");
+  if (!form) return;
+
+  let dirty = false;
+
+  // 입력 변경 시 dirty
+  form.addEventListener("input", () => { dirty = true; });
+
+  // 저장 버튼 눌러 제출하면 dirty 해제
+  form.addEventListener("submit", () => { dirty = false; });
+
+  // saved=1로 돌아온 경우도 dirty 해제
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("saved") === "1") dirty = false;
+
+  window.addEventListener("beforeunload", (e) => {
+    if (!dirty) return;
+    e.preventDefault();
+    e.returnValue = "";
   });
 })();
 </script>
