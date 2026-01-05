@@ -1,13 +1,190 @@
-/*경로 : static> style.css*/
+/* 경로 : static/style.css */
 
 body {
   font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   margin: 0;
   padding: 0;
+  background: #f9f9fb; /* 단계형 화면에 집중되는 느낌 */
 }
 
 .container {
   max-width: 720px;
   margin: 0 auto;
   padding: 48px 20px;
+}
+
+/* 단계 화면 제목 리듬 */
+h2 {
+  margin: 0 0 24px;
+}
+
+.page-title {
+  margin: 0;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.view-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-links a {
+  text-decoration: none;
+}
+
+.hint {
+  opacity: 0.75;
+  margin: 6px 0 0;
+}
+
+/* 단계형 폼 기본 리듬 */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+input[type="text"],
+textarea,
+select {
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+}
+
+textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button {
+  align-self: flex-end;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid #999;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* -----------------------------------------
+   STEP 5: 기록 카드 컴포넌트화 (기본형)
+----------------------------------------- */
+
+.record-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 14px 0;
+}
+
+.record-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.record-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.record-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.record-time {
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.record-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid #eee;
+  border-radius: 999px;
+  opacity: 0.9;
+}
+
+.record-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.record-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.record-block {
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  padding: 12px;
+  background: #fff;
+}
+
+.record-block.subtle {
+  background: #fafafa;
+}
+
+.block-title {
+  font-size: 13px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.block-content {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.record-media img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 14px;
+  border: 1px solid #eee;
+}
+
+.empty-state {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px dashed #ddd;
+  border-radius: 16px;
+  background: #fff;
 }

@@ -1,243 +1,195 @@
-<!--경로: templates/index.html-->
+<!-- 경로 : templates/index.html -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>Mood2Idea</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8">
+  <title>Mood2Idea</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
 <div class="container">
-    <h1>🌱 Mood 2 Idea</h1>
-    <p>오늘의 감정을 아이디어로 남겨보세요.</p>
 
-    <!-- [STEP 3-A] 저장 완료 표시 (PRG redirect로 돌아온 경우만) -->
-    {% if saved == "1" %}
-        <p style="padding:10px 12px; border:1px solid #ddd; border-radius:10px;">
-            ✅ 저장 완료!
-        </p>
-    {% endif %}
+  {% if step == 1 %}
+    <h2>1️⃣ 오늘의 감정 색</h2>
+    <form method="POST">
+      <select name="mood_color" required>
+        <option value="pink"  {% if draft.mood_color == "pink" %}selected{% endif %}>설렘 (핑크)</option>
+        <option value="green" {% if draft.mood_color == "green" %}selected{% endif %}>즐거움 (초록)</option>
+        <option value="mint"  {% if draft.mood_color == "mint" %}selected{% endif %}>평온 (민트)</option>
+        <option value="purple"{% if draft.mood_color == "purple" %}selected{% endif %}>외로움 (보라)</option>
+        <option value="magenta"{% if draft.mood_color == "magenta" %}selected{% endif %}>서운함 (자주색)</option>
+        <option value="blue"  {% if draft.mood_color == "blue" %}selected{% endif %}>우울 (파랑)</option>
+        <option value="navy"  {% if draft.mood_color == "navy" %}selected{% endif %}>지침 (네이비)</option>
+        <option value="yellow"{% if draft.mood_color == "yellow" %}selected{% endif %}>불안 (노랑)</option>
+        <option value="orange"{% if draft.mood_color == "orange" %}selected{% endif %}>초조함 (오렌지)</option>
+        <option value="tangerine"{% if draft.mood_color == "tangerine" %}selected{% endif %}>서러움 (주황)</option>
+        <option value="red"   {% if draft.mood_color == "red" %}selected{% endif %}>분노 (빨강)</option>
+        <option value="wine"  {% if draft.mood_color == "wine" %}selected{% endif %}>답답함 (와인)</option>
+        <option value="black" {% if draft.mood_color == "black" %}selected{% endif %}>혼란 (검정)</option>
+      </select>
 
-    <!-- [NEW] 그림 업로드 대비: multipart/form-data -->
-    <!-- [STEP 3-A] autocomplete="off" : 브라우저가 이전 입력을 자동복원하는 걸 최대한 방지 -->
-    <form id="moodForm" method="POST" enctype="multipart/form-data" autocomplete="off">
-        <p>
-            🎨 오늘의 감정 색:
-            <select name="mood_color" required>
-                <!-- 기존 3개 + 확장 -->
-                <!-- [NEW] selected 유지: 서버에서 넘어온 mood_color로 선택 유지 -->
-                <option value="pink"      {% if mood_color == "pink" %}selected{% endif %}>설렘 (핑크)</option>
-                <option value="green"     {% if mood_color == "green" %}selected{% endif %}>즐거움 (초록)</option>
-                <option value="mint"      {% if mood_color == "mint" %}selected{% endif %}>평온 (민트)</option>
-
-                <option value="purple"    {% if mood_color == "purple" %}selected{% endif %}>외로움 (보라)</option>
-                <option value="magenta"   {% if mood_color == "magenta" %}selected{% endif %}>서운함 (자주색)</option>
-
-                <option value="blue"      {% if mood_color == "blue" %}selected{% endif %}>우울 (파랑)</option>
-                <option value="navy"      {% if mood_color == "navy" %}selected{% endif %}>지침 (네이비)</option>
-
-                <option value="yellow"    {% if mood_color == "yellow" %}selected{% endif %}>불안 (노랑)</option>
-                <option value="orange"    {% if mood_color == "orange" %}selected{% endif %}>초조함 (오렌지)</option>
-                <option value="tangerine" {% if mood_color == "tangerine" %}selected{% endif %}>서러움 (주황)</option>
-
-                <option value="red"       {% if mood_color == "red" %}selected{% endif %}>분노 (빨강)</option>
-                <option value="wine"      {% if mood_color == "wine" %}selected{% endif %}>답답함 (와인)</option>
-
-                <option value="black"     {% if mood_color == "black" %}selected{% endif %}>혼란 (검정)</option>
-            </select>
-        </p>
-
-        <p>
-            ✏️ 오늘의 감정 한 줄:
-            <!-- [NEW] value 유지 -->
-            <input
-                type="text"
-                name="mood_text"
-                placeholder="지금 기분을 적어보세요"
-                required
-                value="{{ mood_text or '' }}"
-                autocomplete="off"
-            >
-        </p>
-
-        <!-- (STEP3용) 모드 분기 라디오: app.py는 다음에 -->
-        <p>
-            🧭 표현 방식:
-            <!-- [NEW] checked 유지: mode 값으로 유지 -->
-            <label>
-                <input type="radio" name="mode" value="write"
-                       {% if (mode or 'write') == "write" %}checked{% endif %}>
-                ✍️ 글
-            </label>
-
-            <label>
-                <input type="radio" name="mode" value="draw"
-                       {% if mode == "draw" %}checked{% endif %}>
-                🎨 그림
-            </label>
-
-            <label>
-                <input type="radio" name="mode" value="music"
-                       {% if mode == "music" %}checked{% endif %}>
-                🎵 음악
-            </label>
-        </p>
-
-        <!-- [NEW] 모드별 입력칸은 "저장 전"에 보여줘야 하니까,
-             폼 안에 항상 존재시키고, JS로 보여주기/숨기기만 함 -->
-
-        <!-- ✍️ 글 -->
-        <div id="panel-write" class="mode-panel">
-            <p>✍️ 글 입력</p>
-            <!-- [NEW] textarea 값 유지 -->
-            <textarea name="text_content" rows="6" placeholder="자유롭게 적어보세요" autocomplete="off">{{ text_content or '' }}</textarea>
-
-            <!-- [NEW] 배경 설명(선택) -->
-            <p style="opacity:0.9;">🧩 이 글을 쓰게 된 생각/맥락 (선택)</p>
-            <input type="text" name="background" placeholder="예: 무슨 일이 있었는지"
-                   value="{{ background or '' }}" autocomplete="off">
-        </div>
-
-        <!-- 🎨 그림 -->
-        <div id="panel-draw" class="mode-panel" style="display:none;">
-            <p>🎨 그림 업로드</p>
-            <input type="file" name="image_file" accept="image/*">
-
-            <!-- [NEW] 배경 설명(선택) -->
-            <p style="opacity:0.9;">🧩 이 그림을 그릴 때의 생각/느낌 (선택)</p>
-            <input type="text" name="background" placeholder="예: 왜 이런 색/형태를 썼는지"
-                   value="{{ background or '' }}" autocomplete="off">
-
-            <p style="opacity:0.75;">(업로드 저장은 다음 단계에서 본격 처리해도 OK)</p>
-        </div>
-
-        <!-- 🎵 음악 -->
-        <div id="panel-music" class="mode-panel" style="display:none;">
-            <p>🎵 음악</p>
-            <p style="opacity:0.75;">(추천 연결은 다음 단계에서)</p>
-        </div>
-
-        <!-- [NEW] 저장 버튼은 항상 동일 위치/동일 동작 -->
-        <button type="submit">저장</button>
+      <button type="submit">다음</button>
     </form>
 
-    <hr>
-    <h2>✅ 오늘의 기록</h2>
+  {% elif step == 2 %}
+    <h2>2️⃣ 감정 한 줄</h2>
+    <form method="POST">
+      <input type="text" name="mood_text" placeholder="지금 기분은?" required value="{{ draft.mood_text or '' }}">
+      <button type="submit">다음</button>
+    </form>
 
-    <p style="opacity:0.85;">
-        보기:
-        <a href="/?n=1">최근 1개</a> |
-        <a href="/?n=5">최근 5개</a> |
-        <a href="/?n=10">최근 10개</a>
-        <span style="margin-left:8px;">(현재 {{ today_records|length }}개)</span>
-    </p>
+  {% elif step == 3 %}
+    <h2>3️⃣ 표현 방식</h2>
+    <form method="POST">
+      <label>
+        <input type="radio" name="mode" value="write"
+               {% if (draft.mode or 'write') == 'write' %}checked{% endif %} required>
+        ✍️ 글
+      </label>
+      <label>
+        <input type="radio" name="mode" value="draw"
+               {% if draft.mode == 'draw' %}checked{% endif %}>
+        🎨 그림
+      </label>
+      <label>
+        <input type="radio" name="mode" value="music"
+               {% if draft.mode == 'music' %}checked{% endif %}>
+        🎵 음악
+      </label>
+      <button type="submit">다음</button>
+    </form>
 
-    {% if today_records and today_records|length > 0 %}
-        {% for r in today_records %}
-            <div style="padding:12px 0; border-top:1px solid #eee;">
-                <p>선택한 색: <b>{{ r.mood_color }}</b></p>
-                <p>감정 한 줄: <b>{{ r.mood_text }}</b></p>
-                <p>표현 방식: <b>{{ r.mode }}</b></p>
+  {% elif step == 4 %}
+    <h2>4️⃣ 표현하기</h2>
 
-                {% if r.mode == "write" and r.text_content %}
-                    <p style="margin-top:12px;"><b>✍️ 글</b></p>
-                    <div style="white-space:pre-wrap;">{{ r.text_content }}</div>
-                {% endif %}
+    <!-- STEP4는 draw 업로드가 있으니 multipart 유지 -->
+    <form method="POST" enctype="multipart/form-data">
 
-                {% if r.background %}
-                    <p style="margin-top:12px;"><b>🧩 배경/맥락</b></p>
-                    <div style="white-space:pre-wrap;">{{ r.background }}</div>
-                {% endif %}
+      {% if draft.mode == "write" %}
+        <textarea name="text_content" placeholder="글을 써도 되고 안 써도 돼요"></textarea>
+
+      {% elif draft.mode == "draw" %}
+        <input type="file" name="image_file" accept="image/*">
+        <input type="text" name="draw_note" placeholder="그림에 대한 생각/느낌 (선택)">
+
+      {% elif draft.mode == "music" %}
+        <!-- ✅ 음악: 키워드만 저장 -->
+        <input
+          type="text"
+          name="music_keywords"
+          placeholder="오늘을 대표하는 음악 키워드 (예: 몽환, 비 오는 밤, 로파이, 새벽, 라흐마니노프)"
+        >
+        <p class="hint">※ 추천/유튜브 검색은 나중에(LLM 연결하면서) 붙일 거예요.</p>
+      {% endif %}
+
+      <input type="text" name="background" placeholder="맥락/상황 (선택)">
+      <button type="submit">저장</button>
+    </form>
+
+  {% else %}
+    <div class="page-head">
+      <div>
+        <h2 class="page-title">🌙 나의 감정 로그</h2>
+        {% if saved %}
+          <p class="hint">✅ 저장되었어요.</p>
+        {% else %}
+          <p class="hint">오늘의 기록이 쌓이는 곳이에요.</p>
+        {% endif %}
+      </div>
+
+      <div class="page-actions">
+        <div class="view-links">
+          <span class="hint">보기:</span>
+          <a href="{{ url_for('history', n=1) }}">최근 1개</a>
+          <a href="{{ url_for('history', n=5) }}">최근 5개</a>
+          <a href="{{ url_for('history', n=10) }}">최근 10개</a>
+        </div>
+
+        <a href="{{ url_for('step1') }}">
+          <button type="button">새 기록하기</button>
+        </a>
+      </div>
+    </div>
+
+    {% if records and records|length > 0 %}
+      {% for r in records %}
+
+        {# --- mode 아이콘 결정 (STEP5-1) --- #}
+        {% set mode_icon = "" %}
+        {% if r.mode == "write" %}{% set mode_icon = "✍️" %}{% endif %}
+        {% if r.mode == "draw" %}{% set mode_icon = "🎨" %}{% endif %}
+        {% if r.mode == "music" %}{% set mode_icon = "🎵" %}{% endif %}
+
+        <article class="record-card">
+          <!-- 카드 헤더: 날짜/아이콘/색 -->
+          <header class="record-head">
+            <div class="record-meta">
+              <span class="record-icon" aria-label="mode">{{ mode_icon }}</span>
+              <span class="record-time">{{ r.date_time }}</span>
             </div>
-        {% endfor %}
+            <div class="record-tags">
+              <span class="tag">색: {{ r.mood_color }}</span>
+            </div>
+          </header>
+
+          <!-- 카드 타이틀: 감정 한 줄 -->
+          <h3 class="record-title">{{ r.mood_text }}</h3>
+
+          <!-- 카드 본문: 모드별 내용 -->
+          <section class="record-body">
+
+            {% if r.text_content %}
+              <div class="record-block">
+                <div class="block-title">✍️ 글</div>
+                <div class="block-content">{{ r.text_content }}</div>
+              </div>
+            {% endif %}
+
+            {% if r.draw_note %}
+              <div class="record-block">
+                <div class="block-title">🎨 그림 메모</div>
+                <div class="block-content">{{ r.draw_note }}</div>
+              </div>
+            {% endif %}
+
+            {% if r.music_keywords %}
+              <div class="record-block">
+                <div class="block-title">🎵 음악 키워드</div>
+                <div class="block-content">{{ r.music_keywords }}</div>
+              </div>
+            {% endif %}
+
+            {% if r.background %}
+              <div class="record-block subtle">
+                <div class="block-title">🧩 맥락</div>
+                <div class="block-content">{{ r.background }}</div>
+              </div>
+            {% endif %}
+
+            {% if r.image_filename %}
+              <figure class="record-media">
+                <img
+                  src="{{ url_for('static', filename='uploads/' + r.image_filename) }}"
+                  alt="uploaded image"
+                >
+              </figure>
+            {% endif %}
+
+          </section>
+        </article>
+
+      {% endfor %}
     {% else %}
-        <p style="opacity:0.75;">아직 기록이 없어요.</p>
+      <div class="empty-state">
+        <p class="hint">아직 기록이 없어요.</p>
+        <a href="{{ url_for('step1') }}">
+          <button type="button">첫 기록 시작하기</button>
+        </a>
+      </div>
     {% endif %}
+
+  {% endif %}
+
 </div>
-
-<!-- [NEW] 라디오 선택 즉시 패널 전환(JS) -->
-<script>
-(function () {
-  const panels = {
-    write: document.getElementById("panel-write"),
-    draw: document.getElementById("panel-draw"),
-    music: document.getElementById("panel-music"),
-  };
-
-  function show(mode) {
-    Object.keys(panels).forEach(k => panels[k].style.display = (k === mode ? "block" : "none"));
-  }
-
-  // 초기 모드: 서버에서 렌더링된 checked 기준으로 맞춰줌
-  const checked = document.querySelector('input[name="mode"]:checked');
-  show(checked ? checked.value : "write");
-
-  // 변경 시 즉시 반영
-  document.querySelectorAll('input[name="mode"]').forEach(r => {
-    r.addEventListener("change", (e) => show(e.target.value));
-  });
-})();
-</script>
-
-<!-- [STEP 3-A] 저장 후 입력부 강제 초기화
-     - 문제: 브라우저(특히 Chrome)가 redirect 후에도 폼 값을 "자동복원"하는 경우가 있음
-     - 해결: saved=1(저장 직후)일 때 form.reset()으로 입력부를 강제로 비움 -->
-<script>
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("saved") !== "1") return;
-
-  const form = document.getElementById("moodForm");
-  if (!form) return;
-
-  // ✅ 브라우저 자동복원보다 강하게: 저장 후엔 무조건 비움
-  form.reset();
-
-  // ✅ 기본 모드는 write로 (원하면 여기 바꿔도 됨)
-  const writeRadio = form.querySelector('input[name="mode"][value="write"]');
-  if (writeRadio) writeRadio.checked = true;
-
-  // 패널 전환도 즉시 반영 (글 패널 보이게)
-  const panelWrite = document.getElementById("panel-write");
-  const panelDraw = document.getElementById("panel-draw");
-  const panelMusic = document.getElementById("panel-music");
-  if (panelWrite && panelDraw && panelMusic) {
-    panelWrite.style.display = "block";
-    panelDraw.style.display = "none";
-    panelMusic.style.display = "none";
-  }
-})();
-</script>
-
-<!-- [STEP 3-A] 저장 후 새로고침 경고 제거
-     - 폼이 수정되면 "dirty"
-     - 저장(submit)하면 dirty 해제
-     - PRG redirect로 돌아온(saved=1) 경우에도 dirty 해제 -->
-<script>
-(function () {
-  const form = document.getElementById("moodForm");
-  if (!form) return;
-
-  let dirty = false;
-
-  // 입력 변경 시 dirty
-  form.addEventListener("input", () => { dirty = true; });
-
-  // 저장 버튼 눌러 제출하면 dirty 해제
-  form.addEventListener("submit", () => { dirty = false; });
-
-  // saved=1로 돌아온 경우도 dirty 해제
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("saved") === "1") dirty = false;
-
-  window.addEventListener("beforeunload", (e) => {
-    if (!dirty) return;
-    e.preventDefault();
-    e.returnValue = "";
-  });
-})();
-</script>
-
 </body>
 </html>
