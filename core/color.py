@@ -36,6 +36,31 @@ COLOR_MAP = {
     "emptiness": (169, 169, 169), # 허무함 (Dark Gray)
 }
 
+# 색상 코드 → 한글 감정 이름 매핑
+MOOD_NAME_MAP = {
+    "pink": "설렘",
+    "green": "즐거움",
+    "mint": "평온",
+    "purple": "외로움",
+    "magenta": "서운함",
+    "blue": "우울",
+    "navy": "지침",
+    "anxiety": "불안",
+    "orange": "초조함",
+    "tangerine": "서러움",
+    "red": "분노",
+    "wine": "답답함",
+    "black": "혼란",
+    "panic": "패닉",
+    "shame": "자괴감",
+    "embarrassed": "창피함",
+    "proud": "뿌듯함",
+    "jealousy": "질투",
+    "longing": "그리움",
+    "grateful": "감사함",
+    "emptiness": "허무함",
+}
+
 
 def rgb_to_hex(r: int, g: int, b: int) -> str:
     """RGB를 HEX 코드로 변환"""

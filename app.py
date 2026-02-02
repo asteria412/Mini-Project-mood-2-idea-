@@ -16,6 +16,7 @@ from core.color import (
     calculate_color_intensity,
     lighten_color,
     get_gradient_css,
+    MOOD_NAME_MAP,
 )
 from core.policy import (
     can_use_ai,
@@ -618,34 +619,9 @@ def step6():
     if not draft.get("mood_color"):
         return redirect(url_for("step1"))
     
-    # 색깔 코드 → 감정 이름 매핑
-    mood_name_map = {
-        "pink": "설렘",
-        "green": "즐거움",
-        "mint": "평온",
-        "purple": "외로움",
-        "magenta": "서운함",
-        "blue": "우울",
-        "navy": "지침",
-        "anxiety": "불안",
-        "orange": "초조함",
-        "tangerine": "서러움",
-        "red": "분노",
-        "wine": "답답함",
-        "black": "혼란",
-        "panic": "패닉",
-        "shame": "자괴감",
-        "embarrassed": "창피함",
-        "proud": "뿌듯함",
-        "jealousy": "질투",
-        "longing": "그리움",
-        "grateful": "감사함",
-        "emptiness": "허무함",
-    }
-    
     # 색 변화 계산
     initial_color = draft.get("mood_color")
-    mood_name = mood_name_map.get(initial_color, initial_color)  # 감정 이름 가져오기
+    mood_name = MOOD_NAME_MAP.get(initial_color, initial_color)  # 감정 이름 가져오기
     expression_done = draft.get("expression_done", False)
     ai_used = draft.get("ai_used", False)
     ai_count = draft.get("ai_count", 0)
@@ -766,31 +742,7 @@ def step7():
         return redirect(url_for("history", saved=1, n=1))
     
     # 감정 이름 매핑
-    mood_name_map = {
-        "pink": "설렘",
-        "green": "즐거움",
-        "mint": "평온",
-        "purple": "외로움",
-        "magenta": "서운함",
-        "blue": "우울",
-        "navy": "지침",
-        "anxiety": "불안",
-        "orange": "초조함",
-        "tangerine": "서러움",
-        "red": "분노",
-        "wine": "답답함",
-        "black": "혼란",
-        "panic": "패닉",
-        "shame": "자괴감",
-        "embarrassed": "창피함",
-        "proud": "뿌듯함",
-        "jealousy": "질투",
-        "longing": "그리움",
-        "grateful": "감사함",
-        "emptiness": "허무함",
-    }
-    
-    initial_mood_name = mood_name_map.get(draft.get("mood_color"), draft.get("mood_color"))
+    initial_mood_name = MOOD_NAME_MAP.get(draft.get("mood_color"), draft.get("mood_color"))
     
     # AI 마무리 한마디
     closing_message = get_closing_message(
@@ -904,31 +856,6 @@ def calendar_date_detail(date_str):
     """
     records = read_records_by_date(DATA_PATH, date_str)
     
-    # 감정 이름 매핑
-    mood_name_map = {
-        "pink": "설렘",
-        "green": "즐거움",
-        "mint": "평온",
-        "purple": "외로움",
-        "magenta": "서운함",
-        "blue": "우울",
-        "navy": "지침",
-        "anxiety": "불안",
-        "orange": "초조함",
-        "tangerine": "서러움",
-        "red": "분노",
-        "wine": "답답함",
-        "black": "혼란",
-        "panic": "패닉",
-        "shame": "자괴감",
-        "embarrassed": "창피함",
-        "proud": "뿌듯함",
-        "jealousy": "질투",
-        "longing": "그리움",
-        "grateful": "감사함",
-        "emptiness": "허무함",
-    }
-    
     # initial_color를 HEX 코드로 변환 (호환성 처리)
     for r in records:
         # initial_color가 없으면 mood_color 사용
@@ -939,7 +866,7 @@ def calendar_date_detail(date_str):
         initial = r.get("initial_color")
         if initial and not initial.startswith("#"):
             r["initial_color_hex"] = lighten_color(initial, 0.0)
-            r["mood_name"] = mood_name_map.get(initial, initial)
+            r["mood_name"] = MOOD_NAME_MAP.get(initial, initial)
         else:
             r["initial_color_hex"] = initial
             r["mood_name"] = initial
