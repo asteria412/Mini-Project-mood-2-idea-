@@ -4,73 +4,275 @@
 <head>
   <meta charset="UTF-8">
   <title>Mood2Idea</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% if step == 1 %}
+  <script src="{{ url_for('static', filename='animation.js') }}" defer></script>
+  {% endif %}
 </head>
 <body>
+<!-- 좌우 색상 인디케이터 (Step 2 이후 표시) -->
+{% if step >= 2 and step < 10 and draft.mood_color %}
+  <!-- 왼쪽: 초기 색 (원색, 진한 색으로 통일) -->
+  <div class="mood-indicator left">
+    <div class="mood-indicator-orb" style="background: 
+      {% if draft.mood_color == 'pink' %}#FF69B4
+      {% elif draft.mood_color == 'green' %}#32CD32
+      {% elif draft.mood_color == 'mint' %}#4FD1C5
+      {% elif draft.mood_color == 'purple' %}#9400D3
+      {% elif draft.mood_color == 'magenta' %}#C71585
+      {% elif draft.mood_color == 'blue' %}#1E90FF
+      {% elif draft.mood_color == 'navy' %}#1A3A52
+      {% elif draft.mood_color == 'anxiety' %}#6A5ACD
+      {% elif draft.mood_color == 'orange' %}#FF8C00
+      {% elif draft.mood_color == 'tangerine' %}#FF6347
+      {% elif draft.mood_color == 'red' %}#DC143C
+      {% elif draft.mood_color == 'wine' %}#722F37
+      {% elif draft.mood_color == 'black' %}#36454F
+      {% elif draft.mood_color == 'panic' %}#1C1C1C
+      {% elif draft.mood_color == 'shame' %}#8B7D6B
+      {% elif draft.mood_color == 'embarrassed' %}#FFB6C1
+      {% elif draft.mood_color == 'proud' %}#6B8E23
+      {% elif draft.mood_color == 'jealousy' %}#FFB347
+      {% elif draft.mood_color == 'longing' %}#FFD700
+      {% elif draft.mood_color == 'grateful' %}#FFDAB9
+      {% elif draft.mood_color == 'emptiness' %}#A9A9A9
+      {% endif %}
+    ;"></div>
+    <div class="mood-indicator-label">처음<br>감정</div>
+  </div>
+
+  <!-- 오른쪽: 현재 색 (활동 후 옅어짐) -->
+  <div class="mood-indicator right">
+    <div class="mood-indicator-orb" style="background: {% if draft.final_color %}{{ draft.final_color }}{% elif current_color %}{{ current_color }}{% else %}
+      {% if draft.mood_color == 'pink' %}#FF69B4
+      {% elif draft.mood_color == 'green' %}#32CD32
+      {% elif draft.mood_color == 'mint' %}#4FD1C5
+      {% elif draft.mood_color == 'purple' %}#9400D3
+      {% elif draft.mood_color == 'magenta' %}#C71585
+      {% elif draft.mood_color == 'blue' %}#1E90FF
+      {% elif draft.mood_color == 'navy' %}#1A3A52
+      {% elif draft.mood_color == 'anxiety' %}#6A5ACD
+      {% elif draft.mood_color == 'orange' %}#FF8C00
+      {% elif draft.mood_color == 'tangerine' %}#FF6347
+      {% elif draft.mood_color == 'red' %}#DC143C
+      {% elif draft.mood_color == 'wine' %}#722F37
+      {% elif draft.mood_color == 'black' %}#36454F
+      {% elif draft.mood_color == 'panic' %}#1C1C1C
+      {% elif draft.mood_color == 'shame' %}#8B7D6B
+      {% elif draft.mood_color == 'embarrassed' %}#FFB6C1
+      {% elif draft.mood_color == 'proud' %}#6B8E23
+      {% elif draft.mood_color == 'jealousy' %}#FFB347
+      {% elif draft.mood_color == 'longing' %}#FFD700
+      {% elif draft.mood_color == 'grateful' %}#FFDAB9
+      {% elif draft.mood_color == 'emptiness' %}#A9A9A9
+      {% endif %}
+    {% endif %};"></div>
+    <div class="mood-indicator-label">지금<br>감정</div>
+  </div>
+{% endif %}
+
 <div class="container">
 
   {% if step == 1 %}
-    <h2>1️⃣ 오늘의 감정 색</h2>
+    <h2>오늘의 감정 색</h2>
+    <p class="hint">오늘의 기분을 가장 잘 표현하는 색을 선택해주세요</p>
+    
     <form method="POST">
-      <select name="mood_color" required>
-        <option value="pink"  {% if draft.mood_color == "pink" %}selected{% endif %}>설렘 (핑크)</option>
-        <option value="green" {% if draft.mood_color == "green" %}selected{% endif %}>즐거움 (초록)</option>
-        <option value="mint"  {% if draft.mood_color == "mint" %}selected{% endif %}>평온 (민트)</option>
-        <option value="purple"{% if draft.mood_color == "purple" %}selected{% endif %}>외로움 (보라)</option>
-        <option value="magenta"{% if draft.mood_color == "magenta" %}selected{% endif %}>서운함 (자주색)</option>
-        <option value="blue"  {% if draft.mood_color == "blue" %}selected{% endif %}>우울 (파랑)</option>
-        <option value="navy"  {% if draft.mood_color == "navy" %}selected{% endif %}>지침 (네이비)</option>
-        <option value="yellow"{% if draft.mood_color == "yellow" %}selected{% endif %}>불안 (노랑)</option>
-        <option value="orange"{% if draft.mood_color == "orange" %}selected{% endif %}>초조함 (오렌지)</option>
-        <option value="tangerine"{% if draft.mood_color == "tangerine" %}selected{% endif %}>서러움 (주황)</option>
-        <option value="red"   {% if draft.mood_color == "red" %}selected{% endif %}>분노 (빨강)</option>
-        <option value="wine"  {% if draft.mood_color == "wine" %}selected{% endif %}>답답함 (와인)</option>
-        <option value="black" {% if draft.mood_color == "black" %}selected{% endif %}>혼란 (검정)</option>
-      </select>
+      <div class="color-grid">
+        <label class="color-chip" data-color="pink">
+          <input type="radio" name="mood_color" value="pink" {% if draft.mood_color == "pink" %}checked{% endif %} required>
+          <div class="chip-visual" style="background: #FF69B4;"></div>
+          <div class="chip-label">설렘</div>
+        </label>
 
-      <button type="submit">다음</button>
+        <label class="color-chip" data-color="green">
+          <input type="radio" name="mood_color" value="green" {% if draft.mood_color == "green" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #32CD32;"></div>
+          <div class="chip-label">즐거움</div>
+        </label>
+
+        <label class="color-chip" data-color="mint">
+          <input type="radio" name="mood_color" value="mint" {% if draft.mood_color == "mint" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #4FD1C5;"></div>
+          <div class="chip-label">평온</div>
+        </label>
+
+        <label class="color-chip" data-color="purple">
+          <input type="radio" name="mood_color" value="purple" {% if draft.mood_color == "purple" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #9400D3;"></div>
+          <div class="chip-label">외로움</div>
+        </label>
+
+        <label class="color-chip" data-color="magenta">
+          <input type="radio" name="mood_color" value="magenta" {% if draft.mood_color == "magenta" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #C71585;"></div>
+          <div class="chip-label">서운함</div>
+        </label>
+
+        <label class="color-chip" data-color="blue">
+          <input type="radio" name="mood_color" value="blue" {% if draft.mood_color == "blue" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #1E90FF;"></div>
+          <div class="chip-label">우울</div>
+        </label>
+
+        <label class="color-chip" data-color="navy">
+          <input type="radio" name="mood_color" value="navy" {% if draft.mood_color == "navy" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #1A3A52;"></div>
+          <div class="chip-label">지침</div>
+        </label>
+
+        <label class="color-chip" data-color="anxiety">
+          <input type="radio" name="mood_color" value="anxiety" {% if draft.mood_color == "anxiety" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #6A5ACD;"></div>
+          <div class="chip-label">불안</div>
+        </label>
+
+        <label class="color-chip" data-color="orange">
+          <input type="radio" name="mood_color" value="orange" {% if draft.mood_color == "orange" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #FF8C00;"></div>
+          <div class="chip-label">초조함</div>
+        </label>
+
+        <label class="color-chip" data-color="tangerine">
+          <input type="radio" name="mood_color" value="tangerine" {% if draft.mood_color == "tangerine" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #FF6347;"></div>
+          <div class="chip-label">서러움</div>
+        </label>
+
+        <label class="color-chip" data-color="red">
+          <input type="radio" name="mood_color" value="red" {% if draft.mood_color == "red" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #DC143C;"></div>
+          <div class="chip-label">분노</div>
+        </label>
+
+        <label class="color-chip" data-color="wine">
+          <input type="radio" name="mood_color" value="wine" {% if draft.mood_color == "wine" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #722F37;"></div>
+          <div class="chip-label">답답함</div>
+        </label>
+
+        <label class="color-chip" data-color="black">
+          <input type="radio" name="mood_color" value="black" {% if draft.mood_color == "black" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #36454F;"></div>
+          <div class="chip-label">혼란</div>
+        </label>
+
+        <label class="color-chip" data-color="panic">
+          <input type="radio" name="mood_color" value="panic" {% if draft.mood_color == "panic" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #1C1C1C;"></div>
+          <div class="chip-label">패닉</div>
+        </label>
+
+        <label class="color-chip" data-color="shame">
+          <input type="radio" name="mood_color" value="shame" {% if draft.mood_color == "shame" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #8B7D6B;"></div>
+          <div class="chip-label">자괴감</div>
+        </label>
+
+        <label class="color-chip" data-color="embarrassed">
+          <input type="radio" name="mood_color" value="embarrassed" {% if draft.mood_color == "embarrassed" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #FFB6C1;"></div>
+          <div class="chip-label">창피함</div>
+        </label>
+
+        <label class="color-chip" data-color="proud">
+          <input type="radio" name="mood_color" value="proud" {% if draft.mood_color == "proud" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #6B8E23;"></div>
+          <div class="chip-label">뿌듯함</div>
+        </label>
+
+        <label class="color-chip" data-color="jealousy">
+          <input type="radio" name="mood_color" value="jealousy" {% if draft.mood_color == "jealousy" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #FFB347;"></div>
+          <div class="chip-label">질투</div>
+        </label>
+
+        <label class="color-chip" data-color="longing">
+          <input type="radio" name="mood_color" value="longing" {% if draft.mood_color == "longing" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #FFD700;"></div>
+          <div class="chip-label">그리움</div>
+        </label>
+
+        <label class="color-chip" data-color="grateful">
+          <input type="radio" name="mood_color" value="grateful" {% if draft.mood_color == "grateful" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #FFDAB9;"></div>
+          <div class="chip-label">감사함</div>
+        </label>
+
+        <label class="color-chip" data-color="emptiness">
+          <input type="radio" name="mood_color" value="emptiness" {% if draft.mood_color == "emptiness" %}checked{% endif %}>
+          <div class="chip-visual" style="background: #A9A9A9;"></div>
+          <div class="chip-label">허무함</div>
+        </label>
+      </div>
+
+      <button type="submit" class="primary-button">다음</button>
     </form>
 
   {% elif step == 2 %}
-    <h2>2️⃣ 감정 한 줄</h2>
+    <h2>감정 한 줄</h2>
+    <p class="hint">지금 느끼는 감정을 한 문장으로 표현해주세요</p>
     <form method="POST">
       <input type="text" name="mood_text" placeholder="지금 기분은?" required value="{{ draft.mood_text or '' }}">
-      <button type="submit">다음</button>
+      <button type="submit" class="primary-button">다음</button>
     </form>
 
   {% elif step == 3 %}
-    <h2>3️⃣ 표현 방식</h2>
+    <h2>표현 방식</h2>
+    <p class="hint">어떤 방식으로 감정을 표현하고 싶으신가요?</p>
+    
     <form method="POST">
-      <label>
-        <input type="radio" name="mode" value="write"
-               {% if (draft.mode or 'write') == 'write' %}checked{% endif %} required>
-        ✍️ 글
-      </label>
-      <label>
-        <input type="radio" name="mode" value="draw"
-               {% if draft.mode == 'draw' %}checked{% endif %}>
-        🎨 그림
-      </label>
-      <label>
-        <input type="radio" name="mode" value="music"
-               {% if draft.mode == 'music' %}checked{% endif %}>
-        🎵 음악
-      </label>
-      <button type="submit">다음</button>
+      <div class="mode-grid">
+        <label class="mode-card">
+          <input type="radio" name="mode" value="write"
+                 {% if (draft.mode or 'write') == 'write' %}checked{% endif %} required>
+          <div class="mode-content">
+            <div class="mode-icon">✍️</div>
+            <div class="mode-title">글</div>
+            <div class="mode-desc">글로 감정을 풀어내요</div>
+          </div>
+        </label>
+
+        <label class="mode-card">
+          <input type="radio" name="mode" value="draw"
+                 {% if draft.mode == 'draw' %}checked{% endif %}>
+          <div class="mode-content">
+            <div class="mode-icon">🎨</div>
+            <div class="mode-title">그림</div>
+            <div class="mode-desc">그림으로 표현해요</div>
+          </div>
+        </label>
+
+        <label class="mode-card">
+          <input type="radio" name="mode" value="music"
+                 {% if draft.mode == 'music' %}checked{% endif %}>
+          <div class="mode-content">
+            <div class="mode-icon">🎵</div>
+            <div class="mode-title">음악</div>
+            <div class="mode-desc">음악으로 공감해요</div>
+          </div>
+        </label>
+      </div>
+
+      <button type="submit" class="primary-button">다음</button>
     </form>
 
   {% elif step == 4 %}
-    <h2>4️⃣ 표현하기</h2>
+    <h2>표현하기</h2>
 
     <!-- STEP4는 draw 업로드가 있으니 multipart 유지 -->
     <form method="POST" enctype="multipart/form-data">
 
       {% if draft.mode == "write" %}
-        <textarea name="text_content" placeholder="글을 써도 되고 안 써도 돼요"></textarea>
+        <textarea name="text_content" placeholder="감정에 대한 글을 자유롭게 적어보세요. AI와 이야기 나누거나 글을 다듬을 수도 있어요"></textarea>
 
       {% elif draft.mode == "draw" %}
-        <input type="file" name="image_file" accept="image/*">
-        <input type="text" name="draw_note" placeholder="그림에 대한 생각/느낌 (선택)">
+        <input type="file" name="image_file" accept="image/*" required>
+        <p class="hint">🎨 그림 파일을 반드시 선택해주세요</p>
+        <input type="text" name="draw_note" placeholder="그림에 담긴 감정이나 생각을 적어보세요 (선택)">
 
       {% elif draft.mode == "music" %}
         <!-- ✅ 음악: 키워드만 저장 -->
@@ -78,12 +280,492 @@
           type="text"
           name="music_keywords"
           placeholder="오늘을 대표하는 음악 키워드 (예: 몽환, 비 오는 밤, 로파이, 새벽, 라흐마니노프)"
+          required
         >
-        <p class="hint">※ 추천/유튜브 검색은 나중에(LLM 연결하면서) 붙일 거예요.</p>
+        <p class="hint">🎵 키워드를 바탕으로 AI가 음악을 추천해드려요 (최대 2회)</p>
       {% endif %}
 
-      <input type="text" name="background" placeholder="맥락/상황 (선택)">
-      <button type="submit">저장</button>
+      <input type="text" name="background" placeholder="어떤 상황에서 이런 감정이 들었나요? (선택)">
+      
+      {% if draft.mode == "music" %}
+        <button type="submit" class="primary-button">🎵 추천받기</button>
+      {% else %}
+        <button type="submit" class="primary-button">다음</button>
+      {% endif %}
+    </form>
+
+  {% elif step == 5 %}
+    <h2>AI 도움 받기</h2>
+    <p class="hint">AI는 감정을 판단하지 않고, 표현을 도와주는 조력자예요.</p>
+
+    {% if ai_limit_exceeded %}
+      <div class="error-message">
+        <p>⚠️ AI와의 대화를 모두 사용했어요. 표현을 더 작성하거나 저장해주세요.</p>
+      </div>
+    {% endif %}
+
+    {% if ai_count > 0 %}
+      <div class="ai-usage-badge">
+        <span>AI 사용: {{ ai_usage }}</span>
+      </div>
+    {% endif %}
+
+    <form method="POST">
+      <div class="ai-choice-grid">
+        <label class="ai-choice-card">
+          <input type="radio" name="ai_choice" value="save" id="ai-save" checked required>
+          <div class="card-content">
+            <div class="card-icon">💾</div>
+            <div class="card-title">그대로 저장</div>
+            <div class="card-desc">AI 없이 바로 저장할게요</div>
+          </div>
+        </label>
+
+        <label class="ai-choice-card {% if not can_use_ai_more %}disabled{% endif %}">
+          <input type="radio" name="ai_choice" value="chat" id="ai-chat" {% if not can_use_ai_more %}disabled{% endif %} required>
+          <div class="card-content">
+            <div class="card-icon">💬</div>
+            <div class="card-title">AI와 대화</div>
+            <div class="card-desc">{% if can_use_ai_more %}이 내용으로 대화하기{% else %}사용 완료{% endif %}</div>
+          </div>
+        </label>
+
+        <label class="ai-choice-card {% if not can_use_ai_more %}disabled{% endif %}">
+          <input type="radio" name="ai_choice" value="develop" id="ai-develop" {% if not can_use_ai_more %}disabled{% endif %} required>
+          <div class="card-content">
+            <div class="card-icon">{% if draft.mode == "draw" %}🎨{% else %}✨{% endif %}</div>
+            <div class="card-title">AI와 디벨롭</div>
+            <div class="card-desc">
+              {% if can_use_ai_more %}
+                {% if draft.mode == "draw" %}이미지 수정 (DALL-E){% else %}이 내용을 더 다듬기{% endif %}
+              {% else %}사용 완료{% endif %}
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <!-- 동적 섹션: AI와 대화 / AI와 디벨롭 선택 시 표시 -->
+      <div id="ai-interaction-section" style="display: none; margin-top: 24px;">
+        
+        {% if draft.mode == "write" %}
+          <!-- 글쓰기: 작성한 내용 -->
+          <div class="preview-section">
+            <div class="preview-label">📝 작성한 내용</div>
+            <div class="preview-content">
+              {{ draft.text_content or "(내용 없음)" }}
+            </div>
+          </div>
+          
+        {% elif draft.mode == "draw" %}
+          <!-- 그림: 이미지 영역 (완전 분리) -->
+          <div class="preview-section">
+            <div class="preview-label">🎨 업로드한 그림</div>
+            <div style="margin-top: 12px; text-align: center;">
+              {% if draft.image_filename %}
+                {% if draft.image_filename.startswith('dalle_') %}
+                  {% set image_path = 'uploads/generated/' + draft.image_filename %}
+                {% else %}
+                  {% set image_path = 'uploads/user/' + draft.image_filename %}
+                {% endif %}
+                <img 
+                  src="{{ url_for('static', filename=image_path) }}" 
+                  alt="업로드한 그림"
+                  style="max-width: 100%; max-height: 400px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+                  onerror="if(!this.dataset.fallback) { this.dataset.fallback='1'; this.src='{{ url_for('static', filename='uploads/' + draft.image_filename) }}'; } else { console.error('이미지 로드 실패:', '{{ draft.image_filename }}'); this.style.display='none'; this.nextElementSibling.style.display='block'; }"
+                >
+                <div style="display: none; color: #E53E3E; padding: 20px; background: #FEF2F2; border-radius: 8px; margin-top: 12px;">
+                  ⚠️ 이미지를 불러올 수 없습니다<br>
+                  <small style="color: #718096;">파일: {{ draft.image_filename }}</small>
+                </div>
+              {% else %}
+                <div style="padding: 40px; background: #F7FAFC; border-radius: 12px; color: #718096; text-align: center;">
+                  📷 업로드된 이미지 없음<br>
+                  <small>draft.image_filename이 비어있습니다</small>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <!-- 그림: 설명 영역 (완전 분리) -->
+          <div class="preview-section">
+            <div class="preview-label">📝 그림 설명</div>
+            <div class="preview-content">
+              {{ draft.draw_note or "(그림 설명 없음)" }}
+            </div>
+          </div>
+          
+        {% elif draft.mode == "music" %}
+          <!-- 음악: 키워드 -->
+          <div class="preview-section">
+            <div class="preview-label">🎵 음악 키워드</div>
+            <div class="preview-content">
+              {{ draft.music_keywords or "(음악 키워드 없음)" }}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- 이전 AI 대화 내역 표시 -->
+        {% if draft.ai_response and draft.ai_count > 0 %}
+          <div class="preview-section" style="background: #F7FAFC;">
+            <div class="preview-label" style="color: #667EEA; font-weight: 700;">💬 이전 AI 대화</div>
+            <div class="preview-content" style="margin-top: 12px; padding: 16px; background: white; border-radius: 12px; font-size: 14px; line-height: 1.8; color: #4A5568; max-height: 200px; overflow-y: auto;">
+              {{ draft.ai_response }}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- 통합 AI 입력창 -->
+        <div id="ai-input-section" class="preview-section" style="display: none;">
+          <label class="input-label" id="ai-input-label">💬 AI에게 하고 싶은 말을 적어주세요</label>
+          <textarea 
+            name="user_input" 
+            id="ai-input-textarea"
+            placeholder="AI에게 하고 싶은 말을 자유롭게 적어보세요"
+          ></textarea>
+          <div id="ai-input-hint" style="display: none; font-size: 12px; color: #718096; margin-top: 8px;">
+            💡 입력하면: DALL-E가 새 이미지 생성 | 비워두면: AI가 이미지 분석 및 조언
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="primary-button">계속하기</button>
+
+      <script>
+        // AI 선택에 따라 UI 동적 변경
+        const aiSave = document.getElementById('ai-save');
+        const aiChat = document.getElementById('ai-chat');
+        const aiDevelop = document.getElementById('ai-develop');
+        const interactionSection = document.getElementById('ai-interaction-section');
+        const aiInputSection = document.getElementById('ai-input-section');
+        const aiInputLabel = document.getElementById('ai-input-label');
+        const aiInputTextarea = document.getElementById('ai-input-textarea');
+        const aiInputHint = document.getElementById('ai-input-hint');
+        
+        const isDraw = {{ 'true' if draft.mode == 'draw' else 'false' }};
+
+        function updateAiSection() {
+          if (aiSave.checked) {
+            // 그대로 저장: 모두 숨김
+            interactionSection.style.display = 'none';
+            aiInputSection.style.display = 'none';
+          } else if (aiChat.checked) {
+            // AI와 대화
+            interactionSection.style.display = 'block';
+            aiInputSection.style.display = 'block';
+            aiInputLabel.textContent = '💬 이 내용과 관련해서 AI와 어떤 대화를 나누고 싶으신가요?';
+            aiInputTextarea.placeholder = 'AI에게 하고 싶은 말을 자유롭게 적어보세요';
+            aiInputHint.style.display = 'none';
+          } else if (aiDevelop.checked) {
+            // AI와 디벨롭
+            interactionSection.style.display = 'block';
+            aiInputSection.style.display = 'block';
+            
+            if (isDraw) {
+              // 그림 모드: DALL-E
+              aiInputLabel.textContent = '🎨 이미지를 어떻게 수정하고 싶으신가요?';
+              aiInputTextarea.placeholder = '예: 나비 한마리 추가, 하늘을 더 밝게, 배경에 산 추가 등... (입력하면 DALL-E가 새 이미지 생성)';
+              aiInputHint.style.display = 'block';
+            } else {
+              // 글쓰기/음악 모드
+              aiInputLabel.textContent = '✨ 이 내용을 AI와 함께 더 다듬어볼까요?';
+              aiInputTextarea.placeholder = '추가하거나 수정하고 싶은 부분이 있다면 적어주세요 (선택)';
+              aiInputHint.style.display = 'none';
+            }
+          }
+        }
+
+        aiSave.addEventListener('change', updateAiSection);
+        aiChat.addEventListener('change', updateAiSection);
+        aiDevelop.addEventListener('change', updateAiSection);
+
+        // 초기 상태 설정
+        updateAiSection();
+      </script>
+    </form>
+
+  {% elif step == 5.5 %}
+    {% if draft.mode == "music" %}
+      <!-- 음악 추천 표시 -->
+      <h2>🎵 음악 추천</h2>
+      
+      <div class="music-recommendation-box">
+        {% if draft.music_parsed %}
+          <!-- 추천 이유 -->
+          {% if draft.music_parsed.reason %}
+            <p class="music-reason">{{ draft.music_parsed.reason }}</p>
+          {% endif %}
+          
+          <!-- 곡 리스트 -->
+          {% if draft.music_parsed.songs %}
+            <ul class="music-list">
+              {% for song in draft.music_parsed.songs %}
+                <li class="music-item">
+                  <div class="music-info">
+                    <span class="music-title">{{ song.display }}</span>
+                  </div>
+                  <a href="{{ song.youtube_url }}" target="_blank" class="youtube-link">
+                    🎵 들어보기
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>{{ draft.ai_response }}</p>
+          {% endif %}
+        {% else %}
+          <p>{{ draft.ai_response }}</p>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <!-- 글쓰기/그림 모드 -->
+      {% if draft.mode == "draw" %}
+        <h2>🎨 AI 결과</h2>
+      {% else %}
+        <h2>🤖 AI 응답</h2>
+      {% endif %}
+      
+      <!-- DALL-E로 생성된 이미지 표시 -->
+      {% if draft.mode == "draw" and draft.image_filename %}
+        <div style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 16px; border: 2px solid #E2E8F0;">
+          <div class="preview-label">✨ 생성된 이미지</div>
+          <div style="margin-top: 12px; text-align: center;">
+            {% if draft.image_filename.startswith('dalle_') %}
+              {% set image_path = 'uploads/generated/' + draft.image_filename %}
+            {% else %}
+              {% set image_path = 'uploads/user/' + draft.image_filename %}
+            {% endif %}
+            <img 
+              src="{{ url_for('static', filename=image_path) }}" 
+              alt="생성된 이미지"
+              style="max-width: 100%; max-height: 500px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);"
+              onerror="if(!this.dataset.fallback) { this.dataset.fallback='1'; this.src='{{ url_for('static', filename='uploads/' + draft.image_filename) }}'; }"
+            >
+          </div>
+        </div>
+      {% endif %}
+      
+      <div class="ai-response-box">
+        <p>{{ draft.ai_response }}</p>
+      </div>
+    {% endif %}
+
+    <form method="POST">
+      <button type="submit" class="primary-button">다음</button>
+    </form>
+
+  {% elif step == 5.9 %}
+    {% if draft.mode == "music" %}
+      <!-- 음악 모드 전용 -->
+      <h2>🎵 음악 추천</h2>
+      <p class="hint">추천받은 음악이 마음에 드셨나요?</p>
+
+      <form method="POST">
+        <div class="next-action-grid music-mode">
+          <label class="next-action-card {% if not can_use_ai_more %}disabled{% endif %}">
+            <input type="radio" name="next_action" value="continue_ai" {% if can_use_ai_more %}checked{% endif %} {% if not can_use_ai_more %}disabled{% endif %} required>
+            <div class="action-content">
+              <div class="action-icon">🔄</div>
+              <div class="action-title">다시 추천받기</div>
+              <div class="action-desc">{% if can_use_ai_more %}다른 음악을 추천받아요{% else %}추천 완료{% endif %}</div>
+              <div class="action-badge {% if can_use_ai_more %}available{% else %}depleted{% endif %}">{{ ai_usage }}</div>
+            </div>
+          </label>
+
+          <label class="next-action-card" {% if not can_use_ai_more %}checked{% endif %}>
+            <input type="radio" name="next_action" value="save" {% if not can_use_ai_more %}checked{% endif %} required>
+            <div class="action-content">
+              <div class="action-icon">💾</div>
+              <div class="action-title">저장하기</div>
+              <div class="action-desc">이 추천으로 저장할게요</div>
+            </div>
+          </label>
+        </div>
+
+        <button type="submit" class="primary-button">선택 완료</button>
+      </form>
+
+    {% else %}
+      <!-- 글쓰기/그림 모드 -->
+      <h2>💭 다음 행동</h2>
+      <p class="hint">지금까지 표현한 내용을 이어갈까요, 저장할까요?</p>
+
+      <!-- 이전 AI 대화 내역 표시 -->
+      {% if draft.ai_response %}
+        <div class="preview-section" style="margin-bottom: 24px; background: #F7FAFC;">
+          <div class="preview-label" style="color: #667EEA; font-weight: 700;">💬 이전 AI 대화</div>
+          <div class="preview-content" style="margin-top: 12px; padding: 16px; background: white; border-radius: 12px; font-size: 14px; line-height: 1.8; color: #4A5568; max-height: 200px; overflow-y: auto;">
+            {{ draft.ai_response }}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- DALL-E로 생성된 이미지 표시 -->
+      {% if draft.mode == "draw" and draft.image_filename %}
+        <div style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 16px; border: 2px solid #E2E8F0;">
+          <div class="preview-label">✨ 현재 이미지</div>
+          <div style="margin-top: 12px; text-align: center;">
+            {% if draft.image_filename.startswith('dalle_') %}
+              {% set image_path = 'uploads/generated/' + draft.image_filename %}
+            {% else %}
+              {% set image_path = 'uploads/user/' + draft.image_filename %}
+            {% endif %}
+            <img 
+              src="{{ url_for('static', filename=image_path) }}" 
+              alt="현재 이미지"
+              style="max-width: 100%; max-height: 400px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.15);"
+              onerror="if(!this.dataset.fallback) { this.dataset.fallback='1'; this.src='{{ url_for('static', filename='uploads/' + draft.image_filename) }}'; }"
+            >
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="POST">
+        <div class="next-action-grid">
+          <label class="next-action-card">
+            <input type="radio" name="next_action" value="continue_expression" checked required>
+            <div class="action-content">
+              <div class="action-icon">✍️</div>
+              <div class="action-title">표현 더 작성하기</div>
+              <div class="action-desc">글/그림/음악을 계속 표현해요</div>
+              <div class="action-badge unlimited">무제한</div>
+            </div>
+          </label>
+
+          <label class="next-action-card {% if not can_use_ai_more %}disabled{% endif %}">
+            <input type="radio" name="next_action" value="continue_ai" {% if not can_use_ai_more %}disabled{% endif %} required>
+            <div class="action-content">
+              <div class="action-icon">🤖</div>
+              <div class="action-title">AI와 더 대화하기</div>
+              <div class="action-desc">{% if can_use_ai_more %}표현을 더 풀어봐요{% else %}사용 완료{% endif %}</div>
+              <div class="action-badge {% if can_use_ai_more %}available{% else %}depleted{% endif %}">{{ ai_usage }}</div>
+            </div>
+          </label>
+
+          <label class="next-action-card">
+            <input type="radio" name="next_action" value="save" required>
+            <div class="action-content">
+              <div class="action-icon">💾</div>
+              <div class="action-title">저장하기</div>
+              <div class="action-desc">지금까지 표현한 내용을 저장해요</div>
+            </div>
+          </label>
+        </div>
+
+        <button type="submit" class="primary-button">선택 완료</button>
+      </form>
+    {% endif %}
+
+  {% elif step == 6 %}
+    <h2>감정의 변화</h2>
+    <p class="hint">표현 활동을 통해 감정이 어떻게 변했는지 확인해보세요</p>
+
+    <!-- 색 변화 비교 -->
+    <div class="color-comparison">
+      <div class="color-comparison-item">
+        <div class="color-label">처음 감정</div>
+        <div class="color-orb-display" style="background: {{ initial_color_hex }};">
+          <div class="orb-inner"></div>
+        </div>
+        <div class="color-name">{{ mood_name }}</div>
+      </div>
+
+      <div class="color-arrow">→</div>
+
+      <div class="color-comparison-item">
+        <div class="color-label">활동 후 감정</div>
+        <div class="color-orb-display" style="background: {{ final_color_hex }};">
+          <div class="orb-inner"></div>
+        </div>
+        <div class="color-intensity">{{ "%.0f"|format(intensity * 100) }}% 옅어짐</div>
+      </div>
+    </div>
+
+    <div class="color-explanation">
+      <p>
+        {% if intensity > 0.5 %}
+          감정이 많이 해소된 것 같아요. ✨
+        {% elif intensity > 0.2 %}
+          감정이 조금 정리되고 있어요. 🌱
+        {% else %}
+          아직 감정이 진하게 남아있네요.
+        {% endif %}
+      </p>
+    </div>
+
+    <form method="POST">
+      <h3 style="margin-top: 32px; margin-bottom: 16px; text-align: center; color: #2D3748;">지금 감정의 진하기를 선택해주세요</h3>
+      <p class="hint" style="margin-bottom: 24px;">위의 "활동 후 감정"을 참고하되, 본인이 느끼는 {{ mood_name }}의 진하기를 선택하세요.<br>왼쪽일수록 진하고, 오른쪽일수록 옅어집니다.</p>
+      
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px;">
+        {% for color_data in intensity_colors %}
+          <label style="cursor: pointer; text-align: center;">
+            <input 
+              type="radio" 
+              name="intensity_level" 
+              value="{{ color_data.level }}" 
+              {% if loop.index == 3 %}checked{% endif %}
+              required
+              style="display: none;"
+            >
+            <div style="
+              width: 80px;
+              height: 80px;
+              border-radius: 50%;
+              background: {{ color_data.color_hex }};
+              border: 3px solid #E2E8F0;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+              transition: all 0.3s ease;
+              position: relative;
+            " class="intensity-orb">
+              <div style="
+                position: absolute;
+                bottom: -28px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 12px;
+                font-weight: 600;
+                color: #4A5568;
+                white-space: nowrap;
+              ">{{ color_data.percentage }}%</div>
+            </div>
+          </label>
+        {% endfor %}
+      </div>
+
+      <style>
+        input[type="radio"]:checked + .intensity-orb {
+          border-color: #667EEA !important;
+          box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important;
+          transform: scale(1.1);
+        }
+        .intensity-orb:hover {
+          border-color: #667EEA;
+          transform: scale(1.05);
+        }
+      </style>
+
+      <button type="submit" class="primary-button" style="margin-top: 48px;">저장하기</button>
+    </form>
+
+  {% elif step == 7 %}
+    <h2>✨ 오늘의 기록 완성</h2>
+    <p class="hint">감정이 기록되었어요. 수고하셨습니다.</p>
+
+    <div class="completion-message">
+      <div class="completion-icon">🌙</div>
+      <p>오늘의 감정이 캘린더에 저장되었어요.</p>
+      
+      {% if closing_message %}
+        <div style="margin-top: 24px; padding: 20px; background: rgba(255, 255, 255, 0.5); border-radius: 16px; border: 1px solid #E2E8F0;">
+          <div style="font-size: 13px; color: #718096; margin-bottom: 8px; font-weight: 600;">💬 마무리 한마디</div>
+          <p style="color: #2D3748; line-height: 1.6; margin: 0;">{{ closing_message }}</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <form method="POST">
+      <button type="submit" class="primary-button">완료</button>
     </form>
 
   {% else %}
@@ -98,16 +780,16 @@
       </div>
 
       <div class="page-actions">
-        <div class="view-links">
-          <span class="hint">보기:</span>
-          <a href="{{ url_for('history', n=1) }}">최근 1개</a>
-          <a href="{{ url_for('history', n=5) }}">최근 5개</a>
-          <a href="{{ url_for('history', n=10) }}">최근 10개</a>
-        </div>
-
         <a href="{{ url_for('step1') }}">
-          <button type="button">새 기록하기</button>
+          <button type="button" class="primary-button" style="font-size: 18px; padding: 16px 48px;">새 기록하기</button>
         </a>
+        
+        <div class="view-links" style="margin-top: 16px; display: flex; gap: 12px; align-items: center;">
+          <a href="{{ url_for('history', n=5) }}" style="color: #667EEA; font-weight: 600;">최근 5개</a>
+          <a href="{{ url_for('history', n=10) }}" style="color: #667EEA; font-weight: 600;">최근 10개</a>
+          <span style="color: #CBD5E0;">|</span>
+          <a href="{{ url_for('calendar_view') }}" style="color: #667EEA; font-weight: 600;">📅 캘린더</a>
+        </div>
       </div>
     </div>
 
@@ -128,7 +810,7 @@
               <span class="record-time">{{ r.date_time }}</span>
             </div>
             <div class="record-tags">
-              <span class="tag">색: {{ r.mood_color }}</span>
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: {{ r.final_color or r.mood_color }}; border: 2px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
             </div>
           </header>
 
@@ -159,6 +841,13 @@
               </div>
             {% endif %}
 
+            {% if r.ai_response %}
+              <div class="record-block ai-block">
+                <div class="block-title">🤖 AI 응답</div>
+                <div class="block-content">{{ r.ai_response }}</div>
+              </div>
+            {% endif %}
+
             {% if r.background %}
               <div class="record-block subtle">
                 <div class="block-title">🧩 맥락</div>
@@ -168,9 +857,15 @@
 
             {% if r.image_filename %}
               <figure class="record-media">
+                {% if r.image_filename.startswith('dalle_') %}
+                  {% set image_path = 'uploads/generated/' + r.image_filename %}
+                {% else %}
+                  {% set image_path = 'uploads/user/' + r.image_filename %}
+                {% endif %}
                 <img
-                  src="{{ url_for('static', filename='uploads/' + r.image_filename) }}"
+                  src="{{ url_for('static', filename=image_path) }}"
                   alt="uploaded image"
+                  onerror="if(!this.dataset.fallback) { this.dataset.fallback='1'; this.src='{{ url_for('static', filename='uploads/' + r.image_filename) }}'; }"
                 >
               </figure>
             {% endif %}
@@ -183,7 +878,7 @@
       <div class="empty-state">
         <p class="hint">아직 기록이 없어요.</p>
         <a href="{{ url_for('step1') }}">
-          <button type="button">첫 기록 시작하기</button>
+          <button type="button" class="primary-button">첫 기록 시작하기</button>
         </a>
       </div>
     {% endif %}

@@ -5,6 +5,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Mood2Idea 튜토리얼</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -15,7 +18,7 @@
       <h1 style="margin:0;">📘 Mood 2 Idea 튜토리얼</h1>
       <p style="margin:6px 0 0; opacity:0.85;">Mood2Idea는 ‘감정의 변화’를 관찰하는 기록 앱이에요.</p>
     </div>
-    <a class="link-btn" href="{{ url_for('home') }}">홈으로</a>
+    <a class="link-btn" href="{{ url_for('root') }}">홈으로</a>
   </div>
 
   <div class="doc">

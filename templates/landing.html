@@ -1,0 +1,363 @@
+<!-- 경로 : templates/landing.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mood2Idea - 감정을 기록하는 공간</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* 랜딩 페이지 전용 스타일 */
+    .landing-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #0F1419 0%, #1A2332 50%, #2D3E50 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    /* 별 배경 */
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* 두둥실 떠오르는 달 */
+    .moon-container {
+      position: relative;
+      z-index: 10;
+      animation: floatUp 2s ease-out forwards, float 3s ease-in-out 2s infinite;
+    }
+
+    /* 구름 */
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 100px;
+      animation: driftCloud linear infinite;
+      z-index: 15;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: '';
+      position: absolute;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 100px;
+    }
+
+    .cloud-1 {
+      width: 100px;
+      height: 30px;
+      top: -20px;
+      left: -50px;
+      animation: driftCloud 15s linear infinite;
+    }
+
+    .cloud-1::before {
+      width: 50px;
+      height: 40px;
+      top: -15px;
+      left: 10px;
+    }
+
+    .cloud-1::after {
+      width: 60px;
+      height: 25px;
+      top: -10px;
+      right: 10px;
+    }
+
+    .cloud-2 {
+      width: 80px;
+      height: 25px;
+      bottom: 30px;
+      right: -60px;
+      animation: driftCloud 20s linear infinite 5s;
+    }
+
+    .cloud-2::before {
+      width: 40px;
+      height: 30px;
+      top: -12px;
+      left: 15px;
+    }
+
+    @keyframes driftCloud {
+      0% {
+        transform: translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.6;
+      }
+      90% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateX(300px);
+        opacity: 0;
+      }
+    }
+
+    @keyframes floatUp {
+      from {
+        opacity: 0;
+        transform: translateY(100px) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .moon {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FFF9E6 0%, #FFE9B3 50%, #FFD666 100%);
+      box-shadow: 
+        0 0 60px rgba(255, 230, 102, 0.6),
+        0 0 120px rgba(255, 230, 102, 0.3),
+        inset -10px -10px 30px rgba(255, 200, 0, 0.2);
+      position: relative;
+    }
+
+    /* 달 표면 크레이터 */
+    .moon::before,
+    .moon::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 200, 0, 0.15);
+    }
+
+    .moon::before {
+      width: 30px;
+      height: 30px;
+      top: 40px;
+      left: 50px;
+    }
+
+    .moon::after {
+      width: 20px;
+      height: 20px;
+      top: 100px;
+      right: 60px;
+    }
+
+    /* 타이틀 */
+    .landing-title {
+      margin-top: 60px;
+      text-align: center;
+      animation: fadeIn 1s ease-out 1.5s both;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .landing-title h1 {
+      font-size: 48px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin: 0 0 16px;
+      text-shadow: 0 2px 20px rgba(255, 255, 255, 0.3);
+      letter-spacing: -1px;
+    }
+
+    .landing-title p {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0 0 48px;
+      line-height: 1.6;
+    }
+
+    /* 시작 버튼 */
+    .start-button {
+      padding: 18px 48px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1A202C;
+      background: linear-gradient(135deg, #FFE66D 0%, #FFD700 100%);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 
+        0 8px 24px rgba(255, 215, 0, 0.4),
+        0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 1s ease-out 2s both;
+    }
+
+    .start-button:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 
+        0 12px 32px rgba(255, 215, 0, 0.5),
+        0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .start-button:active {
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    /* 서브 버튼 컨테이너 */
+    .sub-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 28px;
+      animation: fadeIn 1s ease-out 2.3s both;
+    }
+
+    /* 구름 버튼 */
+    .cloud-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      box-shadow: 
+        0 2px 12px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: all 0.3s ease;
+    }
+
+    .cloud-button:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .cloud-button:active {
+      transform: translateY(0);
+    }
+
+    /* 반응형 */
+    @media (max-width: 640px) {
+      .moon {
+        width: 140px;
+        height: 140px;
+      }
+
+      .landing-title h1 {
+        font-size: 36px;
+      }
+
+      .landing-title p {
+        font-size: 16px;
+      }
+
+      .start-button {
+        padding: 16px 40px;
+        font-size: 16px;
+      }
+
+      .sub-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .cloud-button {
+        padding: 9px 18px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="landing-page">
+    <!-- 별 배경 -->
+    <div class="stars" id="stars"></div>
+
+    <!-- 두둥실 떠오르는 달 -->
+    <div class="moon-container">
+      <div class="moon"></div>
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+    </div>
+
+    <!-- 타이틀 -->
+    <div class="landing-title">
+      <h1>Mood2Idea</h1>
+      <p>오늘의 감정을 색과 표현으로 기록하는 공간</p>
+      <a href="{{ url_for('step1') }}">
+        <button class="start-button">시작하기</button>
+      </a>
+      
+      <div class="sub-buttons">
+        <a href="{{ url_for('calendar_view') }}" class="cloud-button">
+          <span>📅</span>
+          <span>감정 캘린더</span>
+        </a>
+        <a href="{{ url_for('tutorial') }}" class="cloud-button">
+          <span>📘</span>
+          <span>사용 방법</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 별 생성
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.width = Math.random() * 3 + 'px';
+      star.style.height = star.style.width;
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
+      starsContainer.appendChild(star);
+    }
+  </script>
+</body>
+</html>

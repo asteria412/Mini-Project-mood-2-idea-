@@ -1,0 +1,293 @@
+<!-- 경로: templates/calendar_date.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ date_str }} - Mood2Idea</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .date-detail-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .date-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .date-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: #2D3748;
+      margin-bottom: 12px;
+    }
+
+    .date-subtitle {
+      font-size: 16px;
+      color: #718096;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      background: #FFFFFF;
+      border: 2px solid #E2E8F0;
+      border-radius: 12px;
+      font-weight: 600;
+      color: #4A5568;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      border-color: #667EEA;
+      color: #667EEA;
+    }
+
+    .date-record {
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .date-record:hover {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    .record-time {
+      font-size: 14px;
+      color: #A0AEC0;
+      margin-bottom: 16px;
+    }
+
+    .color-change {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 24px 0;
+      padding: 20px;
+      background: #F7FAFC;
+      border-radius: 16px;
+    }
+
+    .color-orb-small {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border: 3px solid #FFFFFF;
+    }
+
+    .color-arrow {
+      font-size: 24px;
+      color: #A0AEC0;
+    }
+
+    .color-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #4A5568;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .intensity-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #667EEA;
+      color: #FFFFFF;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 12px;
+    }
+
+    .record-section {
+      margin: 20px 0;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #2D3748;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-content {
+      padding: 16px;
+      background: #F7FAFC;
+      border-radius: 12px;
+      line-height: 1.8;
+      color: #2D3748;
+      white-space: pre-wrap;
+    }
+
+    .activity-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .activity-badge {
+      padding: 8px 16px;
+      background: #E6FFFA;
+      border: 2px solid #81E6D9;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #234E52;
+    }
+
+    .activity-badge.ai-used {
+      background: #FED7E2;
+      border-color: #FBB6CE;
+      color: #702459;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #A0AEC0;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state-text {
+      font-size: 18px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="date-detail-container">
+    <a href="{{ url_for('calendar_view') }}" class="back-button">← 캘린더로 돌아가기</a>
+
+    <div class="date-header">
+      <h1 class="date-title">{{ date_str }}</h1>
+      <p class="date-subtitle">이 날의 감정 기록</p>
+    </div>
+
+    {% if records and records|length > 0 %}
+      {% for r in records %}
+        <div class="date-record">
+          <div class="record-time">
+            ⏰ {{ (r.timestamp or r.date_time)[11:16] }}
+          </div>
+
+          <!-- 감정 색깔 -->
+          <div class="color-change">
+            <div style="text-align: center;">
+              <div class="color-orb-small" style="background: {{ r.get('initial_color_hex') or r.get('final_color') }};"></div>
+              <div class="color-label">
+                {% if r.get('mood_name') %}
+                  {{ r.mood_name }}
+                {% else %}
+                  처음 감정
+                {% endif %}
+              </div>
+            </div>
+            {% if r.get('final_color') and r.get('initial_color_hex') %}
+              <div class="color-arrow">→</div>
+              <div style="text-align: center;">
+                <div class="color-orb-small" style="background: {{ r.final_color }};"></div>
+                <div class="color-label">
+                  {% if r.get('color_intensity') is not none %}
+                    <span class="intensity-badge">{{ "%.0f"|format(r.color_intensity * 100) }}% 옅어짐</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- 감정 한 줄 -->
+          <div class="record-section">
+            <div class="section-title">💭 오늘의 감정</div>
+            <div class="section-content">{{ r.mood_text }}</div>
+          </div>
+
+          <!-- 표현 방식 -->
+          <div class="record-section">
+            <div class="section-title">🎨 표현 방식</div>
+            <div class="activity-badges">
+              {% if r.mode == "write" %}
+                <span class="activity-badge">✍️ 글쓰기</span>
+              {% elif r.mode == "draw" %}
+                <span class="activity-badge">🎨 그림</span>
+              {% elif r.mode == "music" %}
+                <span class="activity-badge">🎵 음악</span>
+              {% endif %}
+
+              {% if r.get('expression_done') %}
+                <span class="activity-badge">✅ 표현 완료</span>
+              {% endif %}
+
+              {% if r.get('ai_used') %}
+                <span class="activity-badge ai-used">🤖 AI 사용 ({{ r.get('ai_interaction_count', 0) }}회)</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- 표현 내용 -->
+          {% if r.text_content %}
+            <div class="record-section">
+              <div class="section-title">📝 작성한 글</div>
+              <div class="section-content">{{ r.text_content }}</div>
+            </div>
+          {% endif %}
+
+          {% if r.draw_note %}
+            <div class="record-section">
+              <div class="section-title">🖼️ 그림 설명</div>
+              <div class="section-content">{{ r.draw_note }}</div>
+            </div>
+          {% endif %}
+
+          {% if r.music_keywords %}
+            <div class="record-section">
+              <div class="section-title">🎵 음악 키워드</div>
+              <div class="section-content">{{ r.music_keywords }}</div>
+            </div>
+          {% endif %}
+
+          <!-- AI 응답 -->
+          {% if r.ai_response %}
+            <div class="record-section">
+              <div class="section-title">🤖 AI 응답</div>
+              <div class="section-content">{{ r.ai_response }}</div>
+            </div>
+          {% endif %}
+
+          <!-- 상황 -->
+          {% if r.background %}
+            <div class="record-section">
+              <div class="section-title">📍 상황</div>
+              <div class="section-content">{{ r.background }}</div>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <div class="empty-state-text">이 날의 기록이 없어요</div>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
