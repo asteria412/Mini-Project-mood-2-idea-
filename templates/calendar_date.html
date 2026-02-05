@@ -206,11 +206,7 @@
               <div class="color-arrow">→</div>
               <div style="text-align: center;">
                 <div class="color-orb-small" style="background: {{ r.final_color }};"></div>
-                <div class="color-label">
-                  {% if r.get('color_intensity') is not none %}
-                    <span class="intensity-badge">{{ "%.0f"|format(r.color_intensity * 100) }}% 옅어짐</span>
-                  {% endif %}
-                </div>
+                <div class="color-label">마지막 감정</div>
               </div>
             {% endif %}
           </div>

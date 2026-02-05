@@ -9,6 +9,8 @@ from core.storage_local import (
     get_calendar_data,
     build_record,
     save_upload_file,
+    get_records_last_24h,
+    delete_record_by_datetime,
 )
 from core.ai_helper import get_ai_response, get_closing_message
 from core.color import (
@@ -113,6 +115,7 @@ def step1():
     """
     STEP 1
     - 감정 색 선택
+    - 24시간 내 3개 이상이면 교체 선택으로 리다이렉트
     """
     if request.method == "POST":
         mood_color = request.form.get("mood_color")
@@ -121,6 +124,12 @@ def step1():
             clear_draft()
             update_draft(mood_color=mood_color)
             return redirect(url_for("step2"))
+    
+    # GET: 24시간 내 기록 체크
+    recent_records = get_records_last_24h(DATA_PATH)
+    if len(recent_records) >= 3:
+        # 3개 이상이면 교체 선택 화면으로
+        return redirect(url_for("replace_selection"))
 
     return render_template(
         "index.html",
@@ -761,6 +770,66 @@ def step7():
 
 
 # -------------------------------------------------
+# 교체 선택 (24시간 내 3개 제한)
+# -------------------------------------------------
+@app.route("/replace-selection")
+def replace_selection():
+    """
+    24시간 내 3개 기록이 있을 때 교체 선택 화면
+    """
+    recent_records = get_records_last_24h(DATA_PATH)
+    
+    if len(recent_records) < 3:
+        # 3개 미만이면 그냥 step1로
+        return redirect(url_for("step1"))
+    
+    # 각 기록에 "몇 시간 전" 표시용 계산
+    from datetime import datetime
+    now = datetime.now()
+    for record in recent_records:
+        dt_str = record.get("date_time") or record.get("timestamp")
+        if dt_str:
+            record_dt = datetime.fromisoformat(dt_str)
+            delta = now - record_dt
+            hours = int(delta.total_seconds() / 3600)
+            if hours < 1:
+                record["time_ago"] = "방금 전"
+            elif hours < 24:
+                record["time_ago"] = f"{hours}시간 전"
+            else:
+                record["time_ago"] = f"{int(hours/24)}일 전"
+        else:
+            record["time_ago"] = "알 수 없음"
+        
+        # 감정 이름 추가
+        mood_color = record.get("mood_color") or record.get("initial_color")
+        record["mood_name"] = MOOD_NAME_MAP.get(mood_color, mood_color)
+    
+    return render_template(
+        "replace_selection.html",
+        records=recent_records,
+    )
+
+
+@app.route("/replace-record", methods=["POST"])
+def replace_record():
+    """
+    선택한 기록 삭제 후 step1로
+    """
+    selected_datetime = request.form.get("selected_datetime")
+    
+    if selected_datetime:
+        success = delete_record_by_datetime(DATA_PATH, selected_datetime)
+        if success:
+            print(f"✅ 기록 교체를 위해 삭제: {selected_datetime}")
+        else:
+            print(f"⚠️ 기록 삭제 실패: {selected_datetime}")
+    
+    # step1으로 리다이렉트 (이제 2개만 남았으므로 진입 가능)
+    return redirect(url_for("step1"))
+
+
+# -------------------------------------------------
 # 기록 보기(히스토리)
 # -------------------------------------------------
 @app.route("/history")
@@ -834,6 +903,10 @@ def calendar_view(year=None, month=None):
         next_month = 1
         next_year += 1
     
+    # 오늘 날짜
+    today = datetime.now()
+    today_str = today.strftime("%Y-%m-%d")
+    
     return render_template(
         "calendar.html",
         year=year,
@@ -844,6 +917,7 @@ def calendar_view(year=None, month=None):
         prev_month=prev_month,
         next_year=next_year,
         next_month=next_month,
+        today_str=today_str,
     )
 
 

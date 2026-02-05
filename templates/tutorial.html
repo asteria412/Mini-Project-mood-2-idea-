@@ -1,76 +1,438 @@
 <!-- 경로: templates/tutorial.html -->
- 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>Mood2Idea 튜토리얼</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사용 방법 - Mood2Idea</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    .tutorial-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .tutorial-header {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    .tutorial-title {
+      font-size: 48px;
+      font-weight: 900;
+      color: #FFFFFF;
+      margin: 0 0 16px 0;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .tutorial-subtitle {
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    .home-button {
+      position: fixed;
+      top: 30px;
+      right: 30px;
+      padding: 12px 28px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50px;
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 16px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+    }
+
+    .home-button:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .step-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: fadeInUp 0.8s ease backwards;
+    }
+
+    .step-card:nth-child(1) { animation-delay: 0.1s; }
+    .step-card:nth-child(2) { animation-delay: 0.2s; }
+    .step-card:nth-child(3) { animation-delay: 0.3s; }
+    .step-card:nth-child(4) { animation-delay: 0.4s; }
+    .step-card:nth-child(5) { animation-delay: 0.5s; }
+    .step-card:nth-child(6) { animation-delay: 0.6s; }
+
+    .step-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .step-number {
+      position: absolute;
+      top: -10px;
+      right: 30px;
+      font-size: 120px;
+      font-weight: 900;
+      color: rgba(102, 126, 234, 0.08);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .step-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #2D3748;
+      margin: 0;
+    }
+
+    .step-content {
+      position: relative;
+      z-index: 1;
+      line-height: 1.8;
+      color: #4A5568;
+      font-size: 16px;
+    }
+
+    .step-list {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0 0;
+    }
+
+    .step-list li {
+      padding: 12px 0;
+      padding-left: 32px;
+      position: relative;
+      font-size: 17px;
+      color: #2D3748;
+    }
+
+    .step-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .step-highlight {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      padding: 20px 24px;
+      border-radius: 16px;
+      margin-top: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    .step-highlight p {
+      margin: 0;
+      font-size: 16px;
+      color: #2D3748;
+      font-weight: 600;
+    }
+
+    .expression-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .expression-item {
+      text-align: center;
+      padding: 20px;
+      background: #F7FAFC;
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .expression-item:hover {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      transform: translateY(-4px);
+    }
+
+    .expression-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .expression-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2D3748;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 60px;
+      padding: 32px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      animation: fadeIn 1s ease 0.7s backwards;
+    }
+
+    .footer-note p {
+      margin: 0;
+      color: #FFFFFF;
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .tutorial-title {
+        font-size: 36px;
+      }
+
+      .tutorial-subtitle {
+        font-size: 16px;
+      }
+
+      .step-card {
+        padding: 28px;
+      }
+
+      .step-title {
+        font-size: 22px;
+      }
+
+      .step-number {
+        font-size: 80px;
+        right: 20px;
+      }
+
+      .expression-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .home-button {
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <a href="{{ url_for('root') }}" class="home-button">← 홈으로</a>
 
-<div class="container">
-  <div class="topbar">
-    <div>
-      <h1 style="margin:0;">📘 Mood 2 Idea 튜토리얼</h1>
-      <p style="margin:6px 0 0; opacity:0.85;">Mood2Idea는 ‘감정의 변화’를 관찰하는 기록 앱이에요.</p>
+  <div class="tutorial-container">
+    <div class="tutorial-header">
+      <h1 class="tutorial-title">🌱 사용 방법</h1>
+      <p class="tutorial-subtitle">
+        Mood2Idea는 감정을 판단하지 않고,<br>
+        표현 활동을 통한 <strong>변화 과정</strong>을 함께 관찰합니다.
+      </p>
     </div>
-    <a class="link-btn" href="{{ url_for('root') }}">홈으로</a>
+
+    <!-- Step 1 -->
+    <div class="step-card">
+      <div class="step-number">01</div>
+      <div class="step-header">
+        <div class="step-icon">🎨</div>
+        <h2 class="step-title">감정을 색으로 고정하기</h2>
+      </div>
+      <div class="step-content">
+        <p>오늘 느끼는 감정을 <strong>21가지 색상</strong> 중 하나로 선택하세요.</p>
+        <ul class="step-list">
+          <li>색상이 오늘 감정의 <strong>기준점</strong>이 됩니다</li>
+          <li>한 줄로 감정을 간단히 표현해보세요</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card">
+      <div class="step-number">02</div>
+      <div class="step-header">
+        <div class="step-icon">✨</div>
+        <h2 class="step-title">3가지 방식으로 표현하기</h2>
+      </div>
+      <div class="step-content">
+        <p>감정을 표현하는 방법을 선택하세요.</p>
+        <div class="expression-grid">
+          <div class="expression-item">
+            <div class="expression-icon">✍️</div>
+            <div class="expression-label">글로 쓰기</div>
+          </div>
+          <div class="expression-item">
+            <div class="expression-icon">🎨</div>
+            <div class="expression-label">그림 그리기</div>
+          </div>
+          <div class="expression-item">
+            <div class="expression-icon">🎵</div>
+            <div class="expression-label">음악 듣기</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-card">
+      <div class="step-number">03</div>
+      <div class="step-header">
+        <div class="step-icon">🤖</div>
+        <h2 class="step-title">AI 조력자 (선택)</h2>
+      </div>
+      <div class="step-content">
+        <p>표현 활동 중 AI의 도움을 선택할 수 있어요.</p>
+        <ul class="step-list">
+          <li><strong>혼자 계속</strong> 표현하기</li>
+          <li><strong>AI와 대화</strong>하며 표현 이어가기</li>
+          <li>작성한 내용을 <strong>AI와 발전</strong>시키기</li>
+        </ul>
+        <div class="step-highlight">
+          <p>💡 AI는 감정을 평가하지 않고, 표현 활동을 돕는 따뜻한 조력자예요.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step-card">
+      <div class="step-number">04</div>
+      <div class="step-header">
+        <div class="step-icon">🌈</div>
+        <h2 class="step-title">색깔 변화 관찰하기</h2>
+      </div>
+      <div class="step-content">
+        <p>표현 활동과 AI 사용에 따라 색상이 <strong>점진적으로 옅어집니다</strong>.</p>
+        <ul class="step-list">
+          <li>글/그림/음악 활동을 할수록</li>
+          <li>AI와 대화할수록</li>
+          <li>감정의 색이 조금씩 변화해요</li>
+        </ul>
+        <div class="step-highlight">
+          <p>🎯 감정을 평가하는 게 아니라, 활동에 따른 <strong>변화 과정</strong>을 시각화하는 거예요.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step-card">
+      <div class="step-number">05</div>
+      <div class="step-header">
+        <div class="step-icon">💫</div>
+        <h2 class="step-title">최종 감정 선택하기</h2>
+      </div>
+      <div class="step-content">
+        <p>활동 후, 지금 느끼는 감정의 강도를 선택하세요.</p>
+        <ul class="step-list">
+          <li>같은 색상 계열 내에서 <strong>강도를 조절</strong>할 수 있어요</li>
+          <li>최종 결정은 <strong>본인이 직접</strong> 해요</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="step-card">
+      <div class="step-number">06</div>
+      <div class="step-header">
+        <div class="step-icon">📅</div>
+        <h2 class="step-title">캘린더에 기록하기</h2>
+      </div>
+      <div class="step-content">
+        <p>최종 색상이 <strong>달력에 저장</strong>되어 감정 흐름을 볼 수 있어요.</p>
+        <ul class="step-list">
+          <li>날짜별로 감정 색상이 표시돼요</li>
+          <li>하루에 여러 번 기록할 수 있어요</li>
+          <li>지난 감정들을 다시 돌아볼 수 있어요</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      <p>
+        🌟 Mood2Idea는 감정을 좋고 나쁨으로 판단하지 않아요.<br>
+        다만, <strong>표현을 통해 감정이 어떻게 이동하는지</strong> 함께 관찰할 뿐이에요.
+      </p>
+    </div>
   </div>
-
-  <div class="doc">
-    <h2>1) 기준점 만들기</h2>
-    <ul>
-      <li>오늘 감정을 <b>색</b>으로 선택해요.</li>
-      <li>감정을 <b>한 줄</b>로 남겨요.</li>
-    </ul>
-
-    <h2>2) 3-way 표현</h2>
-    <ul>
-      <li>✍️ 글로 쓰거나,</li>
-      <li>🎨 그림으로 남기거나,</li>
-      <li>🎵 음악으로 대표해요.</li>
-    </ul>
-
-    <h2>3) AI의 도움은 선택 사항</h2>
-    <ul>
-      <li><b>혼자 계속 표현</b>해도 되고,</li>
-      <li>원하면 <b>AI와 대화</b> 하거나,</li>
-      <li>결과물을 <b>AI와 발전</b>시킬 수 있어요.</li>
-    </ul>
-
-    <h2>4) 색의 변화 관찰</h2>
-    <ul>
-      <li>글/그림/음악 활동을 하거나,</li>
-      <li>AI 기능을 사용할수록</li>
-    </ul>
-    <p>👉 오늘의 색이 <b>점점 옅어져요.</b></p>
-    <p style="opacity:0.85;">
-      (감정을 평가하는 것이 아닌, <b>활동에 따른 변화 과정</b>을 보여주는 장치에요.)
-    </p>
-
-    <h2>5) 최종 색(감정)은 내가 결정</h2>
-    <ul>
-      <li>마지막에 오늘의 감정을 <b>정리할지/그대로 둘지</b></li>
-      <li>✅ 최종 색 결정은 <b>사용자 본인</b>이 해요.</li>
-    </ul>
-
-    <h2>6) 달력에 저장</h2>
-    <ul>
-      <li>오늘의 최종 색이 <b>달력에 점으로 기록</b>되어</li>
-      <li>나중에 한 달/몇 달의 감정 흐름을 <b>색으로</b> 볼 수 있어요.</li>
-    </ul>
-
-    <hr>
-
-    <p style="opacity:0.85;">
-      ※ 아직 개발 중인 기능(AI, 색 옅어짐, 달력)은 앞으로 단계적으로 들어갈 예정이에요.
-    </p>
-  </div>
-</div>
-
 </body>
 </html>

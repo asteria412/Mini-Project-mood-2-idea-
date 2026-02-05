@@ -287,3 +287,76 @@ def save_upload_file(
     except Exception as e:
         print(f"❌ 파일 저장 실패: {e}")
         return None
+
+
+def get_records_last_24h(data_path: str) -> List[Dict[str, Any]]:
+    """
+    최근 24시간 내 기록 반환 (최신순)
+    """
+    from datetime import timedelta
+    
+    if not os.path.exists(data_path):
+        return []
+    
+    now = datetime.now()
+    cutoff = now - timedelta(hours=24)
+    
+    records: List[Dict[str, Any]] = []
+    with open(data_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+                # date_time 파싱
+                dt_str = record.get("date_time") or record.get("timestamp")
+                if dt_str:
+                    # ISO 형식: "2026-02-02T18:39:27"
+                    record_dt = datetime.fromisoformat(dt_str)
+                    if record_dt >= cutoff:
+                        records.append(record)
+            except (json.JSONDecodeError, ValueError):
+                continue
+    
+    # 최신순 정렬
+    records.sort(key=lambda r: r.get("date_time") or r.get("timestamp", ""), reverse=True)
+    return records
+
+
+def delete_record_by_datetime(data_path: str, date_time_str: str) -> bool:
+    """
+    특정 date_time을 가진 기록 삭제
+    Returns: 삭제 성공 여부
+    """
+    if not os.path.exists(data_path):
+        return False
+    
+    # 모든 기록 읽기
+    records: List[Dict[str, Any]] = []
+    with open(data_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+                records.append(record)
+            except json.JSONDecodeError:
+                continue
+    
+    # 삭제할 기록 제외하고 필터링
+    original_count = len(records)
+    filtered = [r for r in records if r.get("date_time") != date_time_str]
+    
+    if len(filtered) == original_count:
+        # 삭제할 기록을 못 찾음
+        return False
+    
+    # 파일 다시 쓰기
+    with open(data_path, "w", encoding="utf-8") as f:
+        for record in filtered:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    
+    print(f"✅ 기록 삭제 완료: {date_time_str}")
+    return True
